@@ -1,0 +1,6 @@
+dataset=princeton-nlp/SWE-bench_Verified
+split=test
+workers=4
+timeout=600
+agent_backend=swerex_modal
+grader_backend=modal
