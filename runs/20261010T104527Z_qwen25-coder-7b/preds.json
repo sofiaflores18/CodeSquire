@@ -1,0 +1,127 @@
+{
+  "django__django-14434": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "django__django-14434",
+    "model_patch": ""
+  },
+  "django__django-15561": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "django__django-15561",
+    "model_patch": ""
+  },
+  "astropy__astropy-14369": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "astropy__astropy-14369",
+    "model_patch": ""
+  },
+  "astropy__astropy-7336": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "astropy__astropy-7336",
+    "model_patch": ""
+  },
+  "django__django-15863": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "django__django-15863",
+    "model_patch": ""
+  },
+  "matplotlib__matplotlib-23314": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "matplotlib__matplotlib-23314",
+    "model_patch": ""
+  },
+  "matplotlib__matplotlib-24177": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "matplotlib__matplotlib-24177",
+    "model_patch": ""
+  },
+  "mwaskom__seaborn-3187": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "mwaskom__seaborn-3187",
+    "model_patch": ""
+  },
+  "pallets__flask-5014": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "pallets__flask-5014",
+    "model_patch": ""
+  },
+  "matplotlib__matplotlib-23476": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "matplotlib__matplotlib-23476",
+    "model_patch": ""
+  },
+  "psf__requests-1142": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "psf__requests-1142",
+    "model_patch": ""
+  },
+  "pydata__xarray-3677": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "pydata__xarray-3677",
+    "model_patch": ""
+  },
+  "pylint-dev__pylint-4604": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "pylint-dev__pylint-4604",
+    "model_patch": ""
+  },
+  "pylint-dev__pylint-8898": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "pylint-dev__pylint-8898",
+    "model_patch": ""
+  },
+  "pydata__xarray-6938": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "pydata__xarray-6938",
+    "model_patch": ""
+  },
+  "pytest-dev__pytest-5787": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "pytest-dev__pytest-5787",
+    "model_patch": ""
+  },
+  "pytest-dev__pytest-7521": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "pytest-dev__pytest-7521",
+    "model_patch": ""
+  },
+  "scikit-learn__scikit-learn-10297": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "scikit-learn__scikit-learn-10297",
+    "model_patch": ""
+  },
+  "scikit-learn__scikit-learn-11310": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "scikit-learn__scikit-learn-11310",
+    "model_patch": ""
+  },
+  "sphinx-doc__sphinx-11510": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "sphinx-doc__sphinx-11510",
+    "model_patch": ""
+  },
+  "sphinx-doc__sphinx-9698": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "sphinx-doc__sphinx-9698",
+    "model_patch": ""
+  },
+  "sympy__sympy-13878": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "sympy__sympy-13878",
+    "model_patch": ""
+  },
+  "scikit-learn__scikit-learn-11578": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "scikit-learn__scikit-learn-11578",
+    "model_patch": ""
+  },
+  "sympy__sympy-16886": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "sympy__sympy-16886",
+    "model_patch": ""
+  },
+  "sympy__sympy-24066": {
+    "model_name_or_path": "openai/Qwen/Qwen2.5-Coder-7B-Instruct",
+    "instance_id": "sympy__sympy-24066",
+    "model_patch": ""
+  }
+}

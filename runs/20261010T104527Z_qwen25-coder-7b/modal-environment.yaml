@@ -1,0 +1,9 @@
+environment:
+  environment_class: swerex_modal
+  cwd: /testbed
+  timeout: 600
+  startup_timeout: 600.0
+  runtime_timeout: 10800.0
+  deployment_timeout: 10800.0
+run:
+  env_startup_command: ""

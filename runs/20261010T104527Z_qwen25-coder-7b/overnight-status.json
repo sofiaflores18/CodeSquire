@@ -1,0 +1,17 @@
+{
+  "model_alias": "qwen25-coder-7b",
+  "hf_model": "Qwen/Qwen2.5-Coder-7B-Instruct",
+  "run_id": "20261010T104527Z_qwen25-coder-7b",
+  "started_utc": "2026-10-10T11:15:31+00:00",
+  "mode": "all",
+  "agent_backend": "swerex_modal",
+  "grader_backend": "modal",
+  "runner_exit_code": 1,
+  "error": null,
+  "finished_utc": "2026-10-10T11:20:19+00:00",
+  "elapsed_seconds": 288,
+  "prediction_stats": {
+    "predictions": 25,
+    "nonempty_patches": 0
+  }
+}
