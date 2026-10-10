@@ -1,0 +1,7 @@
+models:
+  vibethinker-3b: WeiboAI/VibeThinker-3B
+  qwen-3b: Qwen/Qwen2.5-3B-Instruct
+  qwen-4b: Qwen/Qwen3-4B-Instruct-2507
+  deepseek-7b: deepseek-ai/deepseek-coder-6.7b-instruct
+  qwen25-coder-7b: Qwen/Qwen2.5-Coder-7B-Instruct
+  qwen3-8b: Qwen/Qwen3-8B
