@@ -1,0 +1,28 @@
+instances_by_exit_status:
+    ContextWindowExceededError:
+    - django__django-14434
+    - astropy__astropy-14369
+    - django__django-15561
+    - astropy__astropy-7336
+    - matplotlib__matplotlib-23314
+    - pallets__flask-5014
+    - pylint-dev__pylint-4604
+    - scikit-learn__scikit-learn-10297
+    - scikit-learn__scikit-learn-11578
+    - pytest-dev__pytest-7521
+    - sympy__sympy-16886
+    - sympy__sympy-13878
+    RepeatedFormatError:
+    - django__django-15863
+    - matplotlib__matplotlib-24177
+    - mwaskom__seaborn-3187
+    - psf__requests-1142
+    - pydata__xarray-6938
+    - pydata__xarray-3677
+    - matplotlib__matplotlib-23476
+    - pylint-dev__pylint-8898
+    - pytest-dev__pytest-5787
+    - scikit-learn__scikit-learn-11310
+    - sphinx-doc__sphinx-11510
+    - sphinx-doc__sphinx-9698
+    - sympy__sympy-24066
