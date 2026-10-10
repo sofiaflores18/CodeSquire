@@ -1,0 +1,238 @@
+{
+  "name": "swebench_verified_validation_25",
+  "role": "validation",
+  "dataset": "SWE-bench/SWE-bench_Verified",
+  "revision": "78f471bf655a3137b2e8a75af1501690ec009ec3",
+  "split": "test",
+  "created_date": "2026-10-10",
+  "num_tasks": 25,
+  "source_parquet_sha256": "030cfd7f2a704c4c0226e7f104c725a3b41230b1d3517f9c915ad7ea5be3fa25",
+  "selection": {
+    "method": "Seeded sampling subject to fixed repository and difficulty quotas; first sample satisfying all constraints. No model results, runtime measurements, or gold patches used for selection.",
+    "seed": 20261010,
+    "accepted_draw": 839,
+    "repo_order": [
+      "astropy/astropy",
+      "django/django",
+      "matplotlib/matplotlib",
+      "mwaskom/seaborn",
+      "pallets/flask",
+      "psf/requests",
+      "pydata/xarray",
+      "pylint-dev/pylint",
+      "pytest-dev/pytest",
+      "scikit-learn/scikit-learn",
+      "sphinx-doc/sphinx",
+      "sympy/sympy"
+    ],
+    "repo_quotas": {
+      "astropy/astropy": 2,
+      "django/django": 3,
+      "matplotlib/matplotlib": 3,
+      "mwaskom/seaborn": 1,
+      "pallets/flask": 1,
+      "psf/requests": 1,
+      "pydata/xarray": 2,
+      "pylint-dev/pylint": 2,
+      "pytest-dev/pytest": 2,
+      "scikit-learn/scikit-learn": 3,
+      "sphinx-doc/sphinx": 2,
+      "sympy/sympy": 3
+    },
+    "difficulty_quotas": {
+      "<15 min fix": 10,
+      "15 min - 1 hour": 10,
+      "1-4 hours": 4,
+      ">4 hours": 1
+    },
+    "minimum_distinct_repos_for_1_to_4_hour_tasks": 3,
+    "candidate_sort": "instance_id ascending within each repository",
+    "sampling": "Python random.Random(seed).sample for each repo in repo_order, repeating entire draw until quotas match"
+  },
+  "instance_ids": [
+    "astropy__astropy-14369",
+    "astropy__astropy-7336",
+    "django__django-14434",
+    "django__django-15561",
+    "django__django-15863",
+    "matplotlib__matplotlib-23314",
+    "matplotlib__matplotlib-23476",
+    "matplotlib__matplotlib-24177",
+    "mwaskom__seaborn-3187",
+    "pallets__flask-5014",
+    "psf__requests-1142",
+    "pydata__xarray-3677",
+    "pydata__xarray-6938",
+    "pylint-dev__pylint-4604",
+    "pylint-dev__pylint-8898",
+    "pytest-dev__pytest-5787",
+    "pytest-dev__pytest-7521",
+    "scikit-learn__scikit-learn-10297",
+    "scikit-learn__scikit-learn-11310",
+    "scikit-learn__scikit-learn-11578",
+    "sphinx-doc__sphinx-11510",
+    "sphinx-doc__sphinx-9698",
+    "sympy__sympy-13878",
+    "sympy__sympy-16886",
+    "sympy__sympy-24066"
+  ],
+  "tasks": [
+    {
+      "instance_id": "astropy__astropy-14369",
+      "repo": "astropy/astropy",
+      "difficulty": "1-4 hours",
+      "issue_title": "Incorrect units read from MRT (CDS format) files with astropy.table"
+    },
+    {
+      "instance_id": "astropy__astropy-7336",
+      "repo": "astropy/astropy",
+      "difficulty": "<15 min fix",
+      "issue_title": "units.quantity_input decorator fails for constructors with type hinted return value -> None"
+    },
+    {
+      "instance_id": "django__django-14434",
+      "repo": "django/django",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "Statement created by _create_unique_sql makes references_column always false"
+    },
+    {
+      "instance_id": "django__django-15561",
+      "repo": "django/django",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "AlterField operation should be noop when adding/changing choices on SQLite."
+    },
+    {
+      "instance_id": "django__django-15863",
+      "repo": "django/django",
+      "difficulty": "<15 min fix",
+      "issue_title": "Filter floatformat drops precision in decimal numbers"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23314",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "[Bug]: set_visible() not working for 3d projection"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-23476",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "issue_title": "[Bug]: DPI of a figure is doubled after unpickling on M1 Mac"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24177",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "issue_title": "[Bug]: ax.hist density not auto-scaled when using histtype='step'"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3187",
+      "repo": "mwaskom/seaborn",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "Wrong legend values of large ranges"
+    },
+    {
+      "instance_id": "pallets__flask-5014",
+      "repo": "pallets/flask",
+      "difficulty": "<15 min fix",
+      "issue_title": "Require a non-empty name for Blueprints"
+    },
+    {
+      "instance_id": "psf__requests-1142",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix",
+      "issue_title": "requests.get is ALWAYS sending content length"
+    },
+    {
+      "instance_id": "pydata__xarray-3677",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "Merging dataArray into dataset using dataset method fails"
+    },
+    {
+      "instance_id": "pydata__xarray-6938",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "`.swap_dims()` can modify original object"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4604",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "unused-import false positive for a module used in a type comment"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-8898",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "1-4 hours",
+      "issue_title": "bad-names-rgxs mangles regular expressions with commas"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-5787",
+      "repo": "pytest-dev/pytest",
+      "difficulty": "1-4 hours",
+      "issue_title": "exception serialization should include chained exceptions"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7521",
+      "repo": "pytest-dev/pytest",
+      "difficulty": "<15 min fix",
+      "issue_title": "pytest 6.0.0rc1: capfd.readouterr() converts \\r to \\n"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "linear_model.RidgeClassifierCV's Parameter store_cv_values issue"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-11310",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "issue_title": "Retrieving time to refit the estimator in BaseSearchCV"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-11578",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "For probabilistic scorers, LogisticRegressionCV(multi_class='multinomial') uses OvR to calculate scores"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11510",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "1-4 hours",
+      "issue_title": "source-read event does not modify include'd files source"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-9698",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix",
+      "issue_title": "An index entry with parens was registered for `py:method` directive with `:property:` option"
+    },
+    {
+      "instance_id": "sympy__sympy-13878",
+      "repo": "sympy/sympy",
+      "difficulty": ">4 hours",
+      "issue_title": "Precompute the CDF of several distributions where integration doesn't work well"
+    },
+    {
+      "instance_id": "sympy__sympy-16886",
+      "repo": "sympy/sympy",
+      "difficulty": "<15 min fix",
+      "issue_title": "Morse encoding for \"1\" is not correct"
+    },
+    {
+      "instance_id": "sympy__sympy-24066",
+      "repo": "sympy/sympy",
+      "difficulty": "15 min - 1 hour",
+      "issue_title": "SI._collect_factor_and_dimension() cannot properly detect that exponent is dimensionless"
+    }
+  ],
+  "notes": [
+    "Difficulty labels estimate experienced human engineer effort, not model runtime.",
+    "Repeated checkpoint evaluation makes this a validation set even though the upstream split is named test.",
+    "This intentionally balances repository coverage and oversamples harder tasks relative to the full benchmark. Do not report its score as full SWE-bench Verified performance.",
+    "Keep the selected IDs fixed. Reserve separate Verified tasks for final evaluation.",
+    "No agent runs or environment smoke tests were performed for this selection."
+  ]
+}

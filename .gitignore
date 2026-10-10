@@ -1,0 +1,14 @@
+# Generated benchmark artifacts
+/runs/
+/logs/
+/artifacts/
+/gold.*.json
+/openai__*.json
+*.log
+# Environments, caches, credentials
+.venv*/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
