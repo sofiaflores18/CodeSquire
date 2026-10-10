@@ -1,0 +1,17 @@
+{
+  "model_alias": "qwen3-8b",
+  "hf_model": "Qwen/Qwen3-8B",
+  "run_id": "20261010T104527Z_qwen3-8b",
+  "started_utc": "2026-10-10T11:20:21+00:00",
+  "mode": "all",
+  "agent_backend": "swerex_modal",
+  "grader_backend": "modal",
+  "runner_exit_code": 1,
+  "error": null,
+  "finished_utc": "2026-10-10T11:30:37+00:00",
+  "elapsed_seconds": 617,
+  "prediction_stats": {
+    "predictions": 25,
+    "nonempty_patches": 3
+  }
+}

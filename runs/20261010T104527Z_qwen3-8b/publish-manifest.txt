@@ -1,0 +1,5 @@
+Excluded from GitHub:
+runs/20261010T104527Z_qwen3-8b/model-config.yaml
+runs/20261010T104527Z_qwen3-8b/inference-console.log
+runs/20261010T104527Z_qwen3-8b/minisweagent.log
+runs/20261010T104527Z_qwen3-8b/evaluation-console.log
