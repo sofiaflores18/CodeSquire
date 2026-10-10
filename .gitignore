@@ -1,6 +1,5 @@
 # Generated benchmark artifacts
 /runs/
-/logs/
 /artifacts/
 /gold.*.json
 /openai__*.json
