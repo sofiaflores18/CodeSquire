@@ -1,0 +1,16 @@
+# Qwen/Qwen3-4B-Instruct-2507. Layered after swebench.yaml by run_eval.py.
+# This checkpoint is non-thinking only, so there is no thinking switch to set.
+vllm:
+  max_model_len: 40960   # read by run_eval.py, not passed to mini-SWE-agent
+agent:
+  step_limit: 50
+model:
+  model_kwargs:
+    # Qwen's recommended sampling. Greedy (temperature 0) made the agent
+    # repeat one command until the step limit.
+    temperature: 0.7
+    top_p: 0.8
+    max_tokens: 2048
+    extra_body:
+      top_k: 20          # vLLM-specific, so it goes in the request body
+      min_p: 0.0

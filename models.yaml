@@ -5,3 +5,4 @@ models:
   deepseek-7b: deepseek-ai/deepseek-coder-6.7b-instruct
   qwen25-coder-7b: Qwen/Qwen2.5-Coder-7B-Instruct
   qwen3-8b: Qwen/Qwen3-8B
+  mini-coder: ricdomolm/mini-coder-1.7b
