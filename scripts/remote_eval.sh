@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Docker-free SWE-bench inference on this machine; optional cloud grading with sb-cli.
-# Paths are relative to CodeSquire's repository root.
+# SWE-bench inference and grading with Modal sandboxes; no local Docker or sb-cli.
+# Run from any directory. File paths are relative to the CodeSquire repo root.
 set -euo pipefail
 
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
@@ -11,34 +11,37 @@ if (($#)); then shift; fi
 
 IDS=datasets/swebench_verified_validation_25_ids.txt
 CONFIG=configs/qwen.yaml
-DATASET=princeton-nlp/SWE-Bench_Verified
+DATASET=princeton-nlp/SWE-bench_Verified
 SPLIT=test
 WORKERS=1
 TIMEOUT=600
 MODEL_ALIAS=
+PYTHON=${SWEBENCH_PYTHON:-.venv-swebench/bin/python}
 RUN_ID="run_$(date -u +%Y%m%dT%H%M%SZ)_$$"
 OUT=
 
 usage() {
   cat <<'EOF'
-Usage: scripts/run_swebench.sh MODE [OPTIONS]
+Usage: scripts/remote_eval.sh MODE [OPTIONS]
 Modes: infer | evaluate | all
-  --model ALIAS       Optional alias from models.yaml (e.g. qwen-4b)
-  --ids FILE          Exact SWE-bench instance IDs (one per line)
+  --model ALIAS       Optional model alias from models.yaml (e.g. qwen-4b)
+  --ids FILE          SWE-bench task IDs, one per line
   --config FILE       mini-SWE-agent model/budget overrides
-  --dataset NAME      HF dataset (default: princeton-nlp/SWE-Bench_Verified)
+  --dataset NAME      HF dataset (default: princeton-nlp/SWE-bench_Verified)
   --split NAME        Dataset split (default: test)
-  --run-id NAME       Unique run label
+  --run-id NAME       Unique evaluation run ID
   --output DIR        Run directory (default: runs/RUN_ID)
-  --workers 1         Must remain 1: one shared local worktree
-  --timeout SECONDS   Timeout per shell command (default: 600)
+  --workers N         Concurrent mini-SWE-agent workers (default: 1)
+  --timeout SECONDS   Per-agent shell command and per-task grading timeout (default: 600)
+  --python PATH       Python with swebench[modal] (default: .venv-swebench/bin/python)
 
-infer:    Generate 25 predictions using mini-SWE-agent, WITHOUT Docker.
-evaluate: Submit existing OUTPUT/preds.json to SWE-bench cloud (sb-cli).
-all:      Inference, then submit predictions for cloud evaluation.
+infer:    mini-SWE-agent + Modal sandboxes -> OUTPUT/preds.json
+ evaluate: Official SWE-bench grading on Modal of existing OUTPUT/preds.json
+all:      Both stages; collect reports into OUTPUT/evaluation/
 
-vLLM must already be serving the model on OPENAI_API_BASE.
-Cloud grading requires sb-cli and SWEBENCH_API_KEY.
+Before running: configure Modal with `modal setup` and have vLLM serving
+at OPENAI_API_BASE for infer/all. Install mini-swe-agent[modal] and swebench[modal].
+No Docker daemon or SWEBENCH_API_KEY is needed.
 EOF
 }
 
@@ -60,31 +63,32 @@ while (($#)); do
     --output) OUT=$2 ;;
     --workers) WORKERS=$2 ;;
     --timeout) TIMEOUT=$2 ;;
+    --python) PYTHON=$2 ;;
     *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
   shift 2
 done
 
 [[ "$RUN_ID" =~ ^[A-Za-z0-9_-]+$ ]] || { echo "Invalid run ID" >&2; exit 2; }
-[[ "$WORKERS" == 1 ]] || { echo "--workers must be 1 in local mode" >&2; exit 2; }
-[[ "$TIMEOUT" =~ ^[1-9][0-9]*$ ]] || { echo "Timeout must be positive" >&2; exit 2; }
+for n in "$WORKERS" "$TIMEOUT"; do
+  [[ "$n" =~ ^[1-9][0-9]*$ ]] || { echo "Worker count/timeout must be positive integers" >&2; exit 2; }
+done
 [[ -f "$IDS" ]] || { echo "Missing ID file: $IDS" >&2; exit 2; }
-command -v python >/dev/null
 
-# Validate and normalize exact task IDs; reject duplicates and empty selections.
-mapfile -t TASK_IDS < <(python - "$IDS" <<'PY'
+# Command substitution propagates malformed-ID/duplicate checks (unlike process substitution).
+NORMALIZED=$(python - "$IDS" <<'PY'
 import re, sys
 from pathlib import Path
-ids = [s.strip() for s in Path(sys.argv[1]).read_text().splitlines()
-       if s.strip() and not s.lstrip().startswith('#')]
+ids = [line.strip() for line in Path(sys.argv[1]).read_text().splitlines()
+       if line.strip() and not line.lstrip().startswith('#')]
 if not ids or len(ids) != len(set(ids)):
     sys.exit('Task IDs must be nonempty and unique')
-if any(not re.fullmatch(r'[A-Za-z0-9_.-]+__[A-Za-z0-9_.-]+', s) for s in ids):
+if any(not re.fullmatch(r'[A-Za-z0-9_.-]+__[A-Za-z0-9_.-]+', value) for value in ids):
     sys.exit('Malformed task ID')
 print('\n'.join(ids))
 PY
 )
-((${#TASK_IDS[@]} > 0)) || { echo "No task IDs found" >&2; exit 2; }
+mapfile -t TASK_IDS <<< "$NORMALIZED"
 FILTER=$(python - "${TASK_IDS[@]}" <<'PY'
 import re, sys
 print('^(?:' + '|'.join(map(re.escape, sys.argv[1:])) + ')$')
@@ -92,44 +96,58 @@ PY
 )
 
 if [[ "$MODE" == evaluate && -z "$OUT" ]]; then
-  echo "Pass --output runs/EXISTING_RUN when evaluating saved predictions" >&2
+  echo "Pass --output runs/EXISTING_RUN for saved predictions" >&2
   exit 2
 fi
 OUT=${OUT:-runs/$RUN_ID}
+if [[ "$MODE" == infer || "$MODE" == all ]]; then
+  [[ ! -e "$OUT" ]] || { echo "Output exists: $OUT" >&2; exit 2; }
+  [[ -f "$CONFIG" ]] || { echo "Missing config: $CONFIG" >&2; exit 2; }
+  command -v mini-extra >/dev/null || { echo "Install mini-swe-agent[modal]" >&2; exit 1; }
+  [[ -n "${OPENAI_API_BASE:-}" ]] || { echo "Set OPENAI_API_BASE to vLLM's OpenAI-compatible endpoint" >&2; exit 2; }
+else
+  [[ -f "$OUT/preds.json" ]] || { echo "Missing predictions: $OUT/preds.json" >&2; exit 2; }
+  if [[ -f "$OUT/selected_ids.txt" ]]; then
+    diff -u "$OUT/selected_ids.txt" <(printf '%s\n' "${TASK_IDS[@]}") || {
+      echo "Requested task IDs differ from the inference run; pass the matching --ids file" >&2
+      exit 2
+    }
+  fi
+fi
+
+# Modal authentication is used by both mini-SWE-agent and the SWE-bench grader.
+if [[ "$MODE" == all || "$MODE" == evaluate ]]; then
+  [[ -x "$PYTHON" ]] || { echo "Missing grader Python: $PYTHON" >&2; exit 1; }
+  "$PYTHON" -c 'import swebench.harness.run_evaluation, modal' || {
+    echo "Install swebench[modal] in $PYTHON" >&2; exit 1;
+  }
+fi
+if [[ ! -f "${HOME}/.modal.toml" ]]; then
+  echo "Modal login not found (~/.modal.toml). Run: modal setup" >&2
+  exit 1
+fi
 
 if [[ "$MODE" == infer || "$MODE" == all ]]; then
-  command -v mini-extra >/dev/null || { echo "mini-extra not installed" >&2; exit 1; }
-  command -v git >/dev/null || { echo "git not installed" >&2; exit 1; }
-  [[ ! -e "$OUT" ]] || { echo "Output exists: $OUT" >&2; exit 2; }
-  [[ -f "$CONFIG" ]] || { echo "Missing mini-SWE-agent config: $CONFIG" >&2; exit 2; }
-  [[ -n "${OPENAI_API_BASE:-}" ]] || { echo "Set OPENAI_API_BASE to your vLLM endpoint" >&2; exit 2; }
-  [[ ! -e /testbed && ! -L /testbed ]] || {
-    echo "/testbed already exists; won't overwrite another workspace" >&2; exit 1;
-  }
-  # The stock SWE-bench prompt explicitly uses /testbed. Give it a dedicated
-  # symlink into this run's worktree so paths match while avoiding /testbed data.
-  mkdir -p "$OUT/worktree"
-  OUT_ABS=$(cd "$OUT" && pwd)
-  ln -s "$OUT_ABS/worktree" /testbed
-  trap '[[ -L /testbed ]] && rm -- /testbed' EXIT
-
-  # Loaded *after* the standard SWE-bench config and model overrides.
-  # Each instance starts from its own clean base commit; jobs MUST be sequential.
-  cat > "$OUT/local-environment.yaml" <<EOF
-  environment:
-    environment_class: local
-    cwd: /testbed
-    timeout: $TIMEOUT
-  run:
-    env_startup_command: |
-      set -eu
-      find . -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-      git clone --filter=blob:none --no-checkout "https://github.com/{{ repo }}.git" .
-      git checkout --detach "{{ base_commit }}"
-EOF
+  mkdir -p "$OUT"
   printf '%s\n' "${TASK_IDS[@]}" > "$OUT/selected_ids.txt"
   cp -- "$CONFIG" "$OUT/model-config.yaml"
-  printf '%s\n' "dataset=$DATASET" "split=$SPLIT" "workers=1" "timeout=$TIMEOUT" > "$OUT/run-settings.txt"
+  printf '%s\n' "dataset=$DATASET" "split=$SPLIT" "workers=$WORKERS" \
+    "timeout=$TIMEOUT" "agent_backend=swerex_modal" "grader_backend=modal" > "$OUT/run-settings.txt"
+
+  # SWE-bench images already contain /testbed at the appropriate base commit.
+  # Do not clone repos manually, create a /testbed symlink, or run startup cleanup.
+  # This override is applied LAST so a prior local-mode config can't force Docker.
+  cat > "$OUT/modal-environment.yaml" <<EOF
+environment:
+  environment_class: swerex_modal
+  cwd: /testbed
+  timeout: $TIMEOUT
+  startup_timeout: 600.0
+  runtime_timeout: 10800.0
+  deployment_timeout: 10800.0
+run:
+  env_startup_command: ""
+EOF
 
   MODEL_ARGS=()
   if [[ -n "$MODEL_ALIAS" ]]; then
@@ -147,42 +165,76 @@ PY
 
   export OPENAI_API_KEY="${OPENAI_API_KEY:-EMPTY}"
   export MSWEA_COST_TRACKING="${MSWEA_COST_TRACKING:-ignore_errors}"
-  echo "Local inference: ${#TASK_IDS[@]} tasks, run=$RUN_ID, output=$OUT"
+  echo "Modal agent inference: ${#TASK_IDS[@]} instances; run=$RUN_ID"
   mini-extra swebench --subset "$DATASET" --split "$SPLIT" \
-    --filter "$FILTER" --workers 1 --environment-class local \
-    -c swebench.yaml -c "$CONFIG" -c "$OUT/local-environment.yaml" \
+    --filter "$FILTER" --workers "$WORKERS" --environment-class swerex_modal \
+    -c swebench.yaml -c "$CONFIG" -c "$OUT/modal-environment.yaml" \
     "${MODEL_ARGS[@]}" --output "$OUT" \
     2>&1 | tee "$OUT/inference-console.log"
 fi
 
-# Verify that the runner returned predictions for every selected ID.
+# Verify complete prediction coverage, including empty patches as real attempts.
 python - "$OUT/preds.json" "${TASK_IDS[@]}" <<'PY'
 import json, sys
 from pathlib import Path
-p = Path(sys.argv[1])
-if not p.is_file(): sys.exit(f'Missing predictions: {p}')
-x = json.loads(p.read_text())
-rows = list(x.values()) if isinstance(x, dict) else x
-got = {r['instance_id'] for r in rows}
+path = Path(sys.argv[1])
+if not path.is_file(): sys.exit(f'Missing predictions: {path}')
+obj = json.loads(path.read_text())
+rows = list(obj.values()) if isinstance(obj, dict) else obj
+if not isinstance(rows, list) or not all(isinstance(x, dict) for x in rows):
+    sys.exit('Invalid predictions: expected dictionary/list of prediction objects')
+got = [r.get('instance_id') for r in rows]
 expected = set(sys.argv[2:])
-if len(rows) != len(expected) or got != expected:
-    sys.exit(f'Prediction mismatch: missing={sorted(expected-got)}, extra={sorted(got-expected)}')
+if len(got) != len(expected) or set(got) != expected:
+    sys.exit(f'Prediction mismatch: missing={sorted(expected - set(got))}, extra={sorted(set(got) - expected)}')
 count = sum(bool((r.get('model_patch') or '').strip()) for r in rows)
 print(f'Nonempty patches: {count}/{len(rows)}')
 if count == 0: sys.exit('No nonempty patches; inspect the trajectories')
 PY
 
 if [[ "$MODE" == evaluate || "$MODE" == all ]]; then
-  command -v sb-cli >/dev/null || { echo "Install cloud grader: uv pip install sb-cli" >&2; exit 1; }
-  [[ -n "${SWEBENCH_API_KEY:-}" ]] || { echo "Set SWEBENCH_API_KEY before cloud grading" >&2; exit 1; }
-  mkdir -p "$OUT/cloud-report"
-  IDS_CSV=$(IFS=,; echo "${TASK_IDS[*]}")
-  sb-cli submit swe-bench_verified "$SPLIT" \
+  # The official harness creates logs/run_evaluation/RUN_ID/results.json.
+  # Use a unique run ID for every distinct predictions file to avoid cached grades.
+  LOG_DIR="logs/run_evaluation/$RUN_ID"
+  [[ ! -e "$LOG_DIR" ]] || {
+    echo "Evaluation run ID already has logs: $LOG_DIR. Choose a new --run-id" >&2
+    exit 2
+  }
+  mkdir -p "$OUT/evaluation"
+  echo "Official SWE-bench grading on Modal: $RUN_ID"
+  "$PYTHON" -m swebench.harness.run_evaluation \
+    --dataset_name "$DATASET" --split "$SPLIT" \
     --predictions_path "$OUT/preds.json" \
-    --instance_ids "$IDS_CSV" \
-    --run_id "$RUN_ID" \
-    --output_dir "$OUT/cloud-report" \
+    --instance_ids "${TASK_IDS[@]}" \
+    --timeout "$TIMEOUT" --run_id "$RUN_ID" --modal true \
     2>&1 | tee "$OUT/evaluation-console.log"
+
+  [[ -f "$LOG_DIR/results.json" ]] || {
+    echo "Grading returned without a results.json; inspect evaluation-console.log" >&2
+    exit 1
+  }
+  cp -- "$LOG_DIR/results.json" "$OUT/evaluation/results.json"
+  # Keep small per-instance grading reports in the pushable output folder.
+  while IFS= read -r -d '' report; do
+    rel=${report#"$LOG_DIR"/}
+    mkdir -p "$OUT/evaluation/$(dirname "$rel")"
+    cp -- "$report" "$OUT/evaluation/$rel"
+  done < <(find "$LOG_DIR" -type f -name report.json -print0)
+  python - "$OUT/evaluation/results.json" "${#TASK_IDS[@]}" <<'PY'
+import json, sys
+r = json.load(open(sys.argv[1]))
+expected = int(sys.argv[2])
+if r.get('total_instances') != expected:
+    sys.exit(f"Grading selected {r.get('total_instances')} instances; expected {expected}")
+resolved = r.get('resolved_instances', 0)
+completed = r.get('completed_instances', 0)
+errors = r.get('error_instances', 0)
+empty = r.get('empty_patch_instances', 0)
+print(f"SWE-bench: {resolved}/{expected} resolved; "
+      f"{completed} completed, {errors} grading errors, {empty} empty patches")
+if completed + errors + empty < expected:
+    sys.exit('Incomplete evaluation: some tasks lack results. Inspect Modal logs.')
+PY
 fi
 
-echo "Finished. Predictions: $OUT/preds.json; trajectories: $OUT/<instance_id>/"
+echo "Finished. Predictions: $OUT/preds.json; grading: $OUT/evaluation/results.json (if evaluated)"
