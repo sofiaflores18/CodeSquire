@@ -11,7 +11,7 @@ if (($#)); then shift; fi
 
 IDS=datasets/swebench_verified_validation_25_ids.txt
 CONFIG=configs/qwen.yaml
-DATASET=princeton-nlp/SWE-bench_Verified
+DATASET=SWE-bench/SWE-bench_Verified
 SPLIT=test
 WORKERS=1
 TIMEOUT=600
@@ -27,7 +27,7 @@ Modes: infer | evaluate | all
   --model ALIAS       Optional model alias from models.yaml (e.g. qwen-4b)
   --ids FILE          SWE-bench task IDs, one per line
   --config FILE       mini-SWE-agent model/budget overrides
-  --dataset NAME      HF dataset (default: princeton-nlp/SWE-bench_Verified)
+  --dataset NAME      HF dataset (default: SWE-bench/SWE-bench_Verified)
   --split NAME        Dataset split (default: test)
   --run-id NAME       Unique evaluation run ID
   --output DIR        Run directory (default: runs/RUN_ID)
@@ -193,7 +193,10 @@ if count == 0: sys.exit('No nonempty patches; inspect the trajectories')
 PY
 
 if [[ "$MODE" == evaluate || "$MODE" == all ]]; then
-  # The official harness creates logs/run_evaluation/RUN_ID/results.json.
+  # swebench >=5 writes the summary to ./<model_name_or_path>.<run_id>.json in the
+  # working directory (make_run_report is called without report_dir on the Modal
+  # path, so --report_dir is ignored); per-instance report.json files land under
+  # logs/run_evaluation/RUN_ID/<model_name_or_path>/<instance_id>/.
   # Use a unique run ID for every distinct predictions file to avoid cached grades.
   LOG_DIR="logs/run_evaluation/$RUN_ID"
   [[ ! -e "$LOG_DIR" ]] || {
@@ -209,11 +212,18 @@ if [[ "$MODE" == evaluate || "$MODE" == all ]]; then
     --timeout "$TIMEOUT" --run_id "$RUN_ID" --modal true \
     2>&1 | tee "$OUT/evaluation-console.log"
 
-  [[ -f "$LOG_DIR/results.json" ]] || {
-    echo "Grading returned without a results.json; inspect evaluation-console.log" >&2
+  SUMMARY=$("$PYTHON" - "$OUT/preds.json" "$RUN_ID" <<'SUMMARYPY'
+import json, sys
+obj = json.loads(open(sys.argv[1]).read())
+rows = list(obj.values()) if isinstance(obj, dict) else obj
+print(rows[0]["model_name_or_path"].replace("/", "__") + f".{sys.argv[2]}.json")
+SUMMARYPY
+)
+  [[ -f "$SUMMARY" ]] || {
+    echo "Grading returned without $SUMMARY; inspect evaluation-console.log" >&2
     exit 1
   }
-  cp -- "$LOG_DIR/results.json" "$OUT/evaluation/results.json"
+  cp -- "$SUMMARY" "$OUT/evaluation/results.json"
   # Keep small per-instance grading reports in the pushable output folder.
   while IFS= read -r -d '' report; do
     rel=${report#"$LOG_DIR"/}
