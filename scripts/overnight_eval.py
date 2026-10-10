@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Run Docker-free CodeSquire SWE-bench evaluations sequentially and push results.
+"""Run CodeSquire models sequentially, grade on Modal, and push after each model.
 
 Place at CodeSquire/scripts/overnight_eval.py alongside scripts/remote_eval.sh.
-Only artifacts in each runs/<run_id>/ folder are committed; the cloned worktree,
-model weights, and credential-like files are excluded.
+Only safe artifacts under runs/<run_id>/ are committed. Modal credentials,
+model weights and shell logs are excluded by default.
 """
 
 import argparse
@@ -203,14 +203,22 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--models", nargs="+", help="Model aliases from models.yaml (default: all)")
     p.add_argument("--mode", choices=["infer", "all"], default="all",
-                   help="all = infer + cloud grading; infer = predictions only")
+                   help="all = Modal agent inference + Modal SWE-bench grading; infer = predictions only")
     p.add_argument("--hours-per-model", type=float, default=3,
-                   help="Time limit for inference+cloud grading per model (0 disables limit)")
+                   help="Time limit for inference + Modal grading per model (0 disables limit)")
     p.add_argument("--startup-minutes", type=float, default=30,
                    help="Max minutes for model download and vLLM startup")
     p.add_argument("--include-logs", action="store_true",
                    help="Also commit raw console logs (only for a trusted/private repository)")
     p.add_argument("--skip-tool-probe", action="store_true")
+    p.add_argument("--ids", default="datasets/swebench_verified_validation_25_ids.txt",
+                   help="SWE-bench instance ID file, relative to the repo root")
+    p.add_argument("--workers", type=int, default=1,
+                   help="Concurrent mini-SWE-agent workers (default: 1)")
+    p.add_argument("--timeout", type=int, default=600,
+                   help="Per-agent command and per-task grading timeout in seconds")
+    p.add_argument("--grader-python", default=".venv-swebench/bin/python",
+                   help="Python interpreter with swebench[modal]")
     p.add_argument("--dry-run", action="store_true", help="Print planned models without launching anything")
     args = p.parse_args()
 
@@ -224,16 +232,37 @@ def main():
         if not isinstance(models[name], str):
             p.error(f"Expected models.{name} to be a Hugging Face ID string")
     print_status("Queue: " + ", ".join(f"{x}={models[x]}" for x in selected))
+    if args.workers <= 0 or args.timeout <= 0 or args.hours_per_model < 0 or args.startup_minutes <= 0:
+        p.error("Workers/timeout/startup must be positive; hours-per-model must be nonnegative")
+    if not (ROOT / args.ids).is_file():
+        p.error(f"Missing task IDs file: {args.ids}")
     if args.dry_run:
         return 0
     if not shutil.which("vllm") or not shutil.which("mini-extra"):
         p.error("Activate your Python environment with vllm and mini-extra installed")
     if not check_port_available(PORT):
         p.error("Port 8000 is occupied. Stop the currently running vLLM server first.")
-    if args.mode == "all" and not shutil.which("sb-cli"):
-        p.error("Cloud grading requires sb-cli; install it or use --mode infer")
-    if args.mode == "all" and not os.environ.get("SWEBENCH_API_KEY"):
-        p.error("Set SWEBENCH_API_KEY for cloud grading, or use --mode infer")
+    if not (Path.home() / ".modal.toml").is_file():
+        p.error("Modal credentials missing (~/.modal.toml). Run: modal setup")
+    # Confirm that mini-extra can import the Modal execution backend before renting GPUs.
+    modal_agent = subprocess.run(
+        [sys.executable, "-c", "from minisweagent.environments.extra.swerex_modal import SwerexModalEnvironment"],
+        capture_output=True, text=True,
+    )
+    if modal_agent.returncode:
+        p.error("Install mini-swe-agent[modal] in the active environment: " + modal_agent.stderr.strip())
+    grader_python = Path(args.grader_python)
+    if not grader_python.is_absolute():
+        grader_python = ROOT / grader_python
+    if args.mode == "all":
+        if not grader_python.is_file():
+            p.error(f"Missing grader Python: {grader_python}")
+        grader_import = subprocess.run(
+            [str(grader_python), "-c", "import swebench.harness.run_evaluation, modal"],
+            capture_output=True, text=True,
+        )
+        if grader_import.returncode:
+            p.error("Install swebench[modal] for the grader: " + grader_import.stderr.strip())
 
     if git("rev-parse", "--is-inside-work-tree", quiet=True).stdout.strip() != "true":
         p.error("CodeSquire must be a git repository")
@@ -272,6 +301,8 @@ def main():
         status = {
             "model_alias": alias, "hf_model": model_id,
             "run_id": run_id, "started_utc": now(), "mode": args.mode,
+            "agent_backend": "swerex_modal",
+            "grader_backend": "modal" if args.mode == "all" else None,
             "runner_exit_code": None, "error": None,
         }
         print_status(f"=== Starting {alias} ({model_id}) ===")
@@ -304,7 +335,9 @@ def main():
             # The runner creates runs/<run_id> itself; DO NOT create it here.
             command = ["bash", "scripts/remote_eval.sh", args.mode,
                        "--model", alias, "--run-id", run_id,
-                       "--output", f"runs/{run_id}"]
+                       "--output", f"runs/{run_id}", "--ids", args.ids,
+                       "--workers", str(args.workers), "--timeout", str(args.timeout),
+                       "--python", str(grader_python)]
             print_status("Running: " + " ".join(command))
             with infer_log.open("w") as log:
                 evaluation = subprocess.Popen(command, cwd=ROOT, env=env,
@@ -332,6 +365,18 @@ def main():
         status.update({"finished_utc": now(),
                        "elapsed_seconds": round(time.monotonic() - begin),
                        "prediction_stats": prediction_stats(out / "preds.json")})
+        report_path = out / "evaluation" / "results.json"
+        if report_path.is_file():
+            try:
+                report = json.loads(report_path.read_text())
+                status["grading_stats"] = {
+                    k: report.get(k) for k in (
+                        "total_instances", "completed_instances", "resolved_instances",
+                        "unresolved_instances", "error_instances", "empty_patch_instances",
+                    )
+                }
+            except (ValueError, TypeError) as error:
+                status["grading_stats"] = {"error": f"Invalid results.json: {error}"}
         (out / "overnight-status.json").write_text(json.dumps(status, indent=2) + "\n")
         try:
             pushed = push_results(out, alias, run_id, args.include_logs, branch)
