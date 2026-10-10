@@ -1,0 +1,459 @@
+Modal agent inference: 25 instances; run=20261010T104527Z_vibethinker-3b
+This is mini-swe-agent version 2.4.6.
+Check the v2 migration guide at https://klieret.short.gy/mini-v2-migration
+Loading global config from '/root/.config/mini-swe-agent/.env'
+minisweagent: INFO: Results will be saved to runs/20261010T104527Z_vibethinker-3b                                                                                                                                  
+Logging to 'runs/20261010T104527Z_vibethinker-3b/minisweagent.log'
+minisweagent: INFO: Loading dataset princeton-nlp/SWE-bench_Verified, split test...                                                                                                                                
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Generating test split:   0%|          | 0/500 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 500/500 [00:00<00:00, 32747.02 examples/s]
+minisweagent: INFO: Instance filter: 500 -> 25 instances                                                                                                                                                           
+minisweagent: INFO: Running on 25 instances...                                                                                                                                                                     
+minisweagent: INFO: Building agent config from specs: ['swebench.yaml', 'configs/qwen.yaml', 'runs/20261010T104527Z_vibethinker-3b/modal-environment.yaml']                                                        
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-7336:latest                                                                                               
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.django_1776_django-14434:latest                                                                                                
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-14369:latest                                                                                              
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.django_1776_django-15561:latest                                                                                                
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+[modal-client] 2026-10-10T10:48:21+0000 Warning: Received Status.RESOURCE_EXHAUSTED
+App create rate limit exceeded. Please wait and retry.
+for /modal.client.ModalClient/AppGetOrCreate (4bd7c884). Retrying...
+[modal-client] 2026-10-10T10:48:21+0000 Warning: Received Status.RESOURCE_EXHAUSTED
+App create rate limit exceeded. Please wait and retry.
+for /modal.client.ModalClient/AppGetOrCreate (7c386d50). Retrying...
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+🦖 INFO     Sandbox (sb-01M4JPWYTWKXFHHPR67RV5EQ29) created in 59.66s                                                                                                                                              
+🦖 INFO     Check sandbox logs at https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JPWYTW1PSTW6XGGGMKK40V                                                                   
+🦖 INFO     Sandbox created with id sb-01M4JPWYTWKXFHHPR67RV5EQ29                                                                                                                                                  
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://ar1iubn27zahfa.r431.modal.host                                                                                                                                             
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JPX9S2Z6EW230KQS7HJEMH) created in 70.04s                                                                                                                                              
+🦖 INFO     Check sandbox logs at https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JPX9S2FZPF8CGZAYXKS7AV                                                                   
+🦖 INFO     Sandbox created with id sb-01M4JPX9S2Z6EW230KQS7HJEMH                                                                                                                                                  
+🦖 INFO     Sandbox (sb-01M4JPXAH7BQ5Z8CDN9BP63VCD) created in 71.31s                                                                                                                                              
+🦖 INFO     Check sandbox logs at https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JPXAH7VWH77VP572A22SGV                                                                   
+🦖 INFO     Sandbox created with id sb-01M4JPXAH7BQ5Z8CDN9BP63VCD                                                                                                                                                  
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://71w2txg7l9i16c.r431.modal.host                                                                                                                                             
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://a1irtl1ch0pgd0.r431.modal.host                                                                                                                                             
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 14.12s                                                                                                                                                                              
+🦖 INFO     Runtime started in 12.62s                                                                                                                                                                              
+🦖 INFO     Runtime started in 13.89s                                                                                                                                                                              
+🦖 INFO     Sandbox (sb-01M4JPXSMVB2WAFA9W6X4746FK) created in 86.77s                                                                                                                                              
+🦖 INFO     Check sandbox logs at https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JPXSMVAETSWZG1Y1R7KP3V                                                                   
+🦖 INFO     Sandbox created with id sb-01M4JPXSMVB2WAFA9W6X4746FK                                                                                                                                                  
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://o24btai2udrvid.r444.modal.host                                                                                                                                             
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 14.26s                                                                                                                                                                              
+minisweagent: INFO: Saved trajectory to 'runs/20261010T104527Z_vibethinker-3b/django__django-15561/django__django-15561.traj.json'                                                                                 
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                                                                                                                               
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.django_1776_django-15863:latest                                                                                                
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+minisweagent: INFO: Saved trajectory to 'runs/20261010T104527Z_vibethinker-3b/astropy__astropy-14369/astropy__astropy-14369.traj.json'                                                                             
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                                                                                                                               
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23314:latest                                                                                        
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+minisweagent: INFO: Saved trajectory to 'runs/20261010T104527Z_vibethinker-3b/astropy__astropy-7336/astropy__astropy-7336.traj.json'                                                                               
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                                                                                                                               
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23476:latest                                                                                        
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+minisweagent: INFO: Saved trajectory to 'runs/20261010T104527Z_vibethinker-3b/django__django-14434/django__django-14434.traj.json'                                                                                 
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                                                                                                                               
+🦖 INFO     Building image from docker registry docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24177:latest                                                                                        
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                                                                                                                                      
+🦖 INFO     Starting modal sandbox                                                                                                                                                                                 
+🦖 INFO     Sandbox (sb-01M4JQ1FNVZFT4FN5NT9M73DTS) created in 92.13s                                                                                                                                              
+🦖 INFO     Check sandbox logs at https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ1FNVWKFFBR1ZEWQ1HJTV                                                                   
+🦖 INFO     Sandbox created with id sb-01M4JQ1FNVZFT4FN5NT9M73DTS                                                                                                                                                  
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://b9fql97bu0ojm2.r431.modal.host                                                                                                                                             
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 16.39s                                                                                                                                                                              
+🦖 INFO     Sandbox (sb-01M4JQ2QFZ5FD48JMX722PFGA1) created in 127.48s                                   
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ2QF
+            ZBCHJ6H4R8QSX287V                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ2QFZ5FD48JMX722PFGA1                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://s9rteatv18n2v1.r431.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JQ2ZTRDGX7E6MMTNM85311) created in 130.52s                                   
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ2ZT
+            RHHF9Z6YM9499Q3ZV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ2ZTRDGX7E6MMTNM85311                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://yw99q1jcnmrgaf.r444.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/django__django-15863/django__django-15863.traj.json'               
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-3187:latest                         
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+🦖 INFO     Runtime started in 13.88s                                                                    
+🦖 INFO     Runtime started in 10.52s                                                                    
+🦖 INFO     Sandbox (sb-01M4JQ43JDVVR3MFWDZ795JAWK) created in 151.71s                                   
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ43J
+            DC7Q4ENVED459E5KV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ43JDVVR3MFWDZ795JAWK                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://8rebbag34o3uep.r444.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/matplotlib__matplotlib-23314/matplotlib__matplotlib-23314.traj.json
+'                                                                                                        
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.pallets_1776_flask-5014:latest                           
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/matplotlib__matplotlib-23476/matplotlib__matplotlib-23476.traj.json
+'                                                                                                        
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.psf_1776_requests-1142:latest                            
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+🦖 INFO     Runtime started in 14.34s                                                                    
+🦖 INFO     Sandbox (sb-01M4JQ53PJ43H6GA2BSK54BD2R) created in 62.07s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ53P
+            JZMNPJ4M2YGP72VYV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ53PJ43H6GA2BSK54BD2R                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://wns5ms42gdiram.r433.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 10.31s                                                                    
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/matplotlib__matplotlib-24177/matplotlib__matplotlib-24177.traj.json
+'                                                                                                        
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.pydata_1776_xarray-3677:latest                           
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+🦖 INFO     Sandbox (sb-01M4JQ69YR9B8HB2PQCVYVQJ0T) created in 60.74s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ69Y
+            R2EQP0RC4HQG13JZV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ69YR9B8HB2PQCVYVQJ0T                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://sbaufoe1055uck.r433.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JQ6ABYAVXS6NJNMWEJGS9J) created in 61.49s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ6AB
+            YVN2R5P5BP883VN0V                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ6ABYAVXS6NJNMWEJGS9J                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://8tarhg07qk5efd.r433.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/mwaskom__seaborn-3187/mwaskom__seaborn-3187.traj.json'             
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.pydata_1776_xarray-6938:latest                           
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+🦖 INFO     Runtime started in 10.25s                                                                    
+🦖 INFO     Runtime started in 15.05s                                                                    
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/pallets__flask-5014/pallets__flask-5014.traj.json'                 
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-4604:latest                       
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/psf__requests-1142/psf__requests-1142.traj.json'                   
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-8898:latest                       
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+🦖 INFO     Sandbox (sb-01M4JQ8YM5G4W793ZNT5JW26PQ) created in 105.33s                                   
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ8YM
+            5FN1WF2R6PZ8W3KJV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ8YM5G4W793ZNT5JW26PQ                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://vziubxh9sd1ka0.r436.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 10.47s                                                                    
+🦖 INFO     Sandbox (sb-01M4JQ9HXG9B2X403AG4SAHVCA) created in 56.45s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ9HX
+            GMP0WR4CEJFRCMPHV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ9HXG9B2X403AG4SAHVCA                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://ym9i8k4c17cori.r431.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JQ9NJV66KVRHX0YC67BHQZ) created in 56.43s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ9NJ
+            VE8JC2QWVAWFVZHCV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ9NJV66KVRHX0YC67BHQZ                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://8anadk5s7r9fey.r432.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JQ9PAPCF0VJVZXH5QV2GQC) created in 103.25s                                   
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQ9PA
+            PPRCGWZ7JF6WATTEV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQ9PAPCF0VJVZXH5QV2GQC                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://tafecvu8r79ua0.r449.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 11.57s                                                                    
+🦖 INFO     Runtime started in 13.02s                                                                    
+🦖 INFO     Runtime started in 12.41s                                                                    
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/pydata__xarray-3677/pydata__xarray-3677.traj.json'                 
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-5787:latest                       
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/pylint-dev__pylint-4604/pylint-dev__pylint-4604.traj.json'         
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-7521:latest                       
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/pylint-dev__pylint-8898/pylint-dev__pylint-8898.traj.json'         
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10297:latest              
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/pydata__xarray-6938/pydata__xarray-6938.traj.json'                 
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-11310:latest              
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+🦖 INFO     Sandbox (sb-01M4JQCKCYV753MR460HH9G0SQ) created in 67.24s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQCKC
+            YQJ7NXWD3S9P3S1DV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQCKCYV753MR460HH9G0SQ                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://lu1iai4u209myb.r433.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JQCTHE0R5Q62W9NTMZW68C) created in 54.16s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQCTH
+            EWQKH5BHMY3HQ6W3V                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQCTHE0R5Q62W9NTMZW68C                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://ybceiqr9a716zu.r431.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JQD0VB3A46Q0WZYGP6B93C) created in 58.00s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQD0V
+            B2F323Q3CFQWJ1FAV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQD0VB3A46Q0WZYGP6B93C                                        
+🦖 INFO     Runtime started in 13.10s                                                                    
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://gyszt2m2iaekku.r432.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 13.17s                                                                    
+🦖 INFO     Sandbox (sb-01M4JQDAZT14N7875VE5SGJYGT) created in 68.10s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQDAZ
+            TTDKQBGMHCJ02CTAV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQDAZT14N7875VE5SGJYGT                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://sl93s3y772gnzv.r435.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 12.80s                                                                    
+🦖 INFO     Runtime started in 15.42s                                                                    
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/pytest-dev__pytest-5787/pytest-dev__pytest-5787.traj.json'         
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-11578:latest              
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/pytest-dev__pytest-7521/pytest-dev__pytest-7521.traj.json'         
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-11510:latest                      
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/scikit-learn__scikit-learn-10297/scikit-learn__scikit-learn-10297.t
+raj.json'                                                                                                
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-9698:latest                       
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/scikit-learn__scikit-learn-11310/scikit-learn__scikit-learn-11310.t
+raj.json'                                                                                                
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-13878:latest                            
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+🦖 INFO     Sandbox (sb-01M4JQGAKNN01DC9ST2Z640D9A) created in 59.77s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQGAK
+            NQFDXPS0MKXDV2F3V                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQGAKNN01DC9ST2Z640D9A                                        
+🦖 INFO     Sandbox (sb-01M4JQGB9SD316YYA9N4NCF2R5) created in 68.14s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQGB9
+            S2H1H58NJGSN1KVBV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQGB9SD316YYA9N4NCF2R5                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://kujdnta7pjc2gl.r432.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://2rzmahwg1yum3m.r432.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Sandbox (sb-01M4JQGEEDZN3345DTPFTSXGFT) created in 60.24s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQGEE
+            D4F2C77WQZKWB50DV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQGEEDZN3345DTPFTSXGFT                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://aj4jmgcue6gzzj.r431.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 13.57s                                                                    
+🦖 INFO     Runtime started in 14.79s                                                                    
+🦖 INFO     Runtime started in 15.51s                                                                    
+🦖 INFO     Sandbox (sb-01M4JQHB6BYN3M4Y5MMW9DPCXE) created in 74.00s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQHB6
+            BARHQ3NZ43PE2W82V                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQHB6BYN3M4Y5MMW9DPCXE                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://ru8y84tp2u2cgs.r448.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 14.56s                                                                    
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/scikit-learn__scikit-learn-11578/scikit-learn__scikit-learn-11578.t
+raj.json'                                                                                                
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-16886:latest                            
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/sphinx-doc__sphinx-11510/sphinx-doc__sphinx-11510.traj.json'       
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Building image from docker registry                                                          
+            docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24066:latest                            
+🦖 WARNING  DOCKER_USERNAME and DOCKER_PASSWORD not set. Using public images.                            
+🦖 INFO     Starting modal sandbox                                                                       
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/sphinx-doc__sphinx-9698/sphinx-doc__sphinx-9698.traj.json'         
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/sympy__sympy-13878/sympy__sympy-13878.traj.json'                   
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+🦖 INFO     Sandbox (sb-01M4JQKT7T5VV220V9JTW6V43V) created in 61.06s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQKT7
+            TV97AVBK6183M07BV                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQKT7T5VV220V9JTW6V43V                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://v9qjlv6t1f9c8f.r444.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 11.79s                                                                    
+🦖 INFO     Sandbox (sb-01M4JQMD377ZW322G5W5JJQWW9) created in 79.46s                                    
+🦖 INFO     Check sandbox logs at                                                                        
+            https://modal.com/apps/adam-mouedden/main/deployed/swe-rex?activeTab=logs&taskId=ta-01M4JQMD3
+            75KYG7XBX1PA00A3V                                                                            
+🦖 INFO     Sandbox created with id sb-01M4JQMD377ZW322G5W5JJQWW9                                        
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:238: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  self.logger.info(f"Starting runtime at {tunnel.url}")
+🦖 INFO     Starting runtime at https://9hqhsozpb37a2n.r445.modal.host                                   
+/venv/main/lib/python3.12/site-packages/swerex/deployment/modal.py:241: DeprecationError: 2026-03-05: `.url` on unencrypted tunnels will be deprecated in a future release. For HTTPS, use an encrypted tunnel instead: with `forward()`, call `forward(port)` without `unencrypted=True`; with sandboxes, declare the port in `encrypted_ports` instead of `unencrypted_ports`.
+  host=tunnel.url, timeout=self._runtime_timeout, auth_token=token, logger=self.logger
+🦖 INFO     Runtime started in 14.43s                                                                    
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/sympy__sympy-16886/sympy__sympy-16886.traj.json'                   
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+minisweagent: INFO: Saved trajectory to                                                                  
+'runs/20261010T104527Z_vibethinker-3b/sympy__sympy-24066/sympy__sympy-24066.traj.json'                   
+🦖 DEBUG    Ensuring deployment is stopped because object is deleted                                     
+  Overall Progress ($0.00) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 25/25 100% 0:14:45 eta: 0:00:00
+┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Exit Status         ┃ Count ┃ Most recent instances                                   ┃
+┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ RepeatedFormatError │    25 │ sympy__sympy-24066, sympy__sympy-16886, sympy__sympy... │
+└─────────────────────┴───────┴─────────────────────────────────────────────────────────┘Nonempty patches: 0/25
+No nonempty patches; inspect the trajectories
