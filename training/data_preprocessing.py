@@ -15,8 +15,12 @@ def data_preprocessing_SFT(num_samples: int):
     # Keep only the conversational data needed for SFT
     dataset = dataset.select_columns(["messages"])
 
+    # Arbitrary seed
     dataset = dataset.shuffle(seed=11)
 
-    qwen_coder_trajectories_subdataset = dataset.select(num_samples)
+    # Select the top n
+    qwen_coder_trajectories_subdataset = dataset.select(range(num_samples))
     print(qwen_coder_trajectories_subdataset)
     print(qwen_coder_trajectories_subdataset[0]["messages"][:3])
+
+    return qwen_coder_trajectories_subdataset
