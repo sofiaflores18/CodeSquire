@@ -27,9 +27,6 @@ class CodeSquireTrainer:
         )
         dataset = data_preprocessing_SFT(num_samples)
         self.trainer = SFTTrainer(model=model_name, train_dataset=dataset, args=training_args)
-        
-        self.trainer.model.print_trainable_parameters()
-        print("Model dtype:", self.trainer.model.dtype)
 
         self.trainer.train()
 
