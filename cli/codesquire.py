@@ -25,6 +25,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import http.client
 import time
 import urllib.error
 import urllib.request
@@ -38,7 +39,7 @@ DEFAULT_API_KEY = os.environ.get("CODESQUIRE_API_KEY", os.environ.get("OPENAI_AP
 # Where to look when nobody says. 8080 is the port the VM tunnel forwards; 8000 is vLLM's
 # own default and what run_eval.py uses locally. Trying both means the demo works either
 # way instead of failing with a connection error that looks like the server is down.
-DEFAULT_PORTS = (8080, 8000)
+DEFAULT_PORTS = (8000, 8080)
 
 
 def default_endpoints() -> list[str]:
@@ -474,13 +475,18 @@ def _request(url: str, cfg: Config, payload: dict | None = None, timeout: int | 
         raise ServerError(f"Cannot reach the model server at {cfg.api_base} ({error.reason}).") from None
     except TimeoutError:
         raise ServerError(f"Request to {url} timed out after {timeout or cfg.request_timeout}s") from None
+    except (http.client.HTTPException, OSError) as error:
+        # A port that accepts and then drops the connection -- a tunnel whose far end is
+        # not serving -- surfaces here, not as URLError, and must stay recoverable so
+        # resolve_endpoint can try the next candidate instead of crashing.
+        raise ServerError(f"Cannot reach the model server at {cfg.api_base} ({error}).") from None
 
 
 UNREACHABLE_HELP = """\
 Open the tunnel to the VM and start vLLM inside that session
 (the exact commands for this project are in cli/README.md):
-  ssh -p <ssh-port> root@<vm-host> -L 8080:localhost:8080
-  vllm serve <model> --port 8080 --max-model-len 16384
+  ssh -p <ssh-port> root@<vm-host> -L 8000:localhost:8000
+  vllm serve <model> --port 8000 --max-model-len 16384
 Already serving somewhere else? Name it:
   codesquire --api-base http://<host>:<port>/v1"""
 
@@ -1282,7 +1288,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("prompt", nargs="*", help="the task for the agent")
     parser.add_argument("--api-base", default=None,
                         help="vLLM OpenAI endpoint (default: $CODESQUIRE_API_BASE, else "
-                             "whichever of localhost:8080 and localhost:8000 answers)")
+                             "whichever of localhost:8000 and localhost:8080 answers)")
     parser.add_argument("--api-key", default=DEFAULT_API_KEY, help="bearer token, if the server needs one")
     parser.add_argument("-m", "--model", default="", help="model id (default: whatever the server serves)")
     parser.add_argument("-C", "--cwd", default=None, help="working directory for commands (default: here)")

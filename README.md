@@ -34,8 +34,8 @@ One task, inference and grading:
 ```bash
 scripts/run_swebench.sh all \
   --ids datasets/smoke_ids.txt \
-  --config configs/qwen.yaml \
-  --run-id qwen_smoke_01
+  --config configs/qwen3-8b-sft.yaml \
+  --run-id qwen3-8b-sft-squire-v1
 ```
 
 Reference-patch validation for all selected tasks:
@@ -59,10 +59,10 @@ Different model, selection, or dataset:
 scripts/run_swebench.sh all \
   --dataset SWE-bench/SWE-bench_Verified \
   --split test \
-  --ids datasets/my_selection_ids.txt \
-  --config configs/another_model.yaml \
+  --ids datasets/swebench_verified_validation_25_ids.txt\
+  --config configs/qwen3-8b-sft.yaml \
   --workers 1 --eval-workers 2 --timeout 600 \
-  --run-id another_model_01
+  --run-id qwen3-8b-sft-test1
 ```
 
 Use the same ID file when running inference and grading separately. The script checks

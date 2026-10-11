@@ -2,8 +2,10 @@
 """Grade one run directory and write report.json next to its preds.json.
 
     python scripts/grade_run.py runs/qwen3-8b_20261010T180537Z
+    python scripts/grade_run.py runs/<id> --backend local --workers 2
 
-Only nonempty submissions are sent to the SWE-bench harness (on Modal).
+Only nonempty submissions are sent to the SWE-bench harness, on Modal or
+with local Docker (--backend local); the report is the same either way.
 Empty patches, step-limit exits, loops and crashes are counted from the
 trajectories and reported, but never graded: they cannot resolve anything.
 """
@@ -18,7 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "datasets" / "swebench_verified_validation_25.json"
 
 
-def main(out: Path) -> dict:
+def main(out: Path, backend: str = "modal", workers: int = 2) -> dict:
     manifest = json.loads(MANIFEST.read_text())
     ids = manifest["instance_ids"]
 
@@ -39,6 +41,11 @@ def main(out: Path) -> dict:
     if to_grade:
         # The harness writes logs/ and <model>.<run_id>.json into its cwd.
         run_id = out.name
+        # Only the execution backend differs; everything below is identical, so
+        # the local Docker path gets the same report.json as the Modal path.
+        backend_args = (
+            ["--modal", "true"] if backend == "modal" else ["--max_workers", str(workers)]
+        )
         subprocess.run(
             [
                 sys.executable, "-m", "swebench.harness.run_evaluation",
@@ -48,7 +55,7 @@ def main(out: Path) -> dict:
                 "--instance_ids", *to_grade,
                 "--run_id", run_id,
                 "--timeout", "600",
-                "--modal", "true",
+                *backend_args,
             ],
             cwd=out,
             check=True,
@@ -58,6 +65,7 @@ def main(out: Path) -> dict:
     resolved = graded.get("resolved_ids", [])
     report = {
         "run": out.name,
+        "backend": backend,
         "model": preds[0]["model_name_or_path"] if preds else None,
         "tasks": len(ids),
         "exit_statuses": dict(exit_statuses.most_common()),
@@ -90,4 +98,9 @@ def main(out: Path) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("run_dir", type=Path)
-    main(parser.parse_args().run_dir.resolve())
+    parser.add_argument("--backend", choices=["modal", "local"], default="modal",
+                        help="Where to execute the tests (default: modal)")
+    parser.add_argument("--workers", type=int, default=2,
+                        help="Concurrent grading tasks; local backend only")
+    args = parser.parse_args()
+    main(args.run_dir.resolve(), args.backend, args.workers)

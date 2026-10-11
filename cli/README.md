@@ -4,14 +4,16 @@
 
 ```bash
 # 1. Open a tunnel to the VM. Leave this terminal open.
-ssh -p 30018 root@47.150.239.19 -L 8080:localhost:8080
+ssh -p 30018 root@47.150.239.19 -L 8000:localhost:8000
 
 # 2. In that same SSH session, serve the model. Leave it running.
-vllm serve Adammouedden/codesquire --port 8080 --max-model-len 16384
+#    scripts/vllm_onstart.sh does this for you, with these same settings.
+vllm serve training/outputs --served-model-name qwen3-8b-sft \
+  --host 127.0.0.1 --port 8000 --max-model-len 40960
 
 # 3. In a NEW terminal on your machine, check the model is reachable.
 #    Expect a JSON list with one model in it.
-curl http://localhost:8080/v1/models
+curl http://localhost:8000/v1/models
 
 # 4. Still on your machine, go to the project you want it to work on and ask.
 cd ~/your/project
@@ -19,15 +21,22 @@ cd ~/your/project
 ```
 
 That is everything. Step 4 needs no `--api-base`: with nothing specified the CLI tries
-`localhost:8080` and then `localhost:8000`, so it finds the tunnel on its own.
+`localhost:8000` and then `localhost:8080`, so it finds the tunnel on its own.
 
 Two things worth knowing about step 4: `--docker` runs the agent's commands in a
 throwaway container that shares only the current directory, and the first run pulls
 `python:3.12-slim` (~130 MB), so it takes a moment. Drop `--docker` to run commands
 directly on your machine, where each one asks for approval first.
 
-The port has to agree in steps 1-3. The tunnel forwards 8080, so vLLM is told to serve
-on 8080 rather than its usual 8000; if you change one, change all three.
+The one number that has to agree across steps 1-3 is the port. vLLM serves on 8000 (its
+default, and what `scripts/vllm_onstart.sh` uses), so the tunnel forwards 8000 and the
+curl checks 8000. If you serve on a different port, say `-L 8000:localhost:<that port>`
+in step 1 and leave the rest alone — the tunnel is what translates, so the CLI still
+finds it at `localhost:8000`.
+
+If step 3 hangs or prints nothing, the tunnel is up but the far end is not serving: the
+port in step 2 and the right-hand port in step 1 disagree. Check what the VM is actually
+listening on with `ssh -p 30018 root@47.150.239.19 'ss -ltnp | grep vllm'`.
 
 Optional, so you can type `codesquire` anywhere:
 
@@ -49,11 +58,12 @@ reach the server.
 ## Setup
 
 The tunnel in step 1 above is what keeps the model server off the public internet: vLLM
-listens on the VM's loopback only, and `-L 8080:localhost:8080` is the only way in. Run
-it in the background with `-N` if you would rather not keep a shell open:
+is started with `--host 127.0.0.1`, so it listens on the VM's loopback only and the
+forward is the only way in. Run it in the background with `-N` if you would rather not
+keep a shell open:
 
 ```bash
-ssh -N -p 30018 root@47.150.239.19 -L 8080:localhost:8080 &
+ssh -N -p 30018 root@47.150.239.19 -L 8000:localhost:8000 &
 ./cli/codesquire.py "add type hints to utils.py"
 ```
 
@@ -63,8 +73,8 @@ To reach a server on another host or port, pass `--api-base`, or set it once so 
 stop passing it:
 
 ```bash
-set -Ux CODESQUIRE_API_BASE http://vm-host:8080/v1     # fish
-export CODESQUIRE_API_BASE=http://vm-host:8080/v1      # bash/zsh
+set -Ux CODESQUIRE_API_BASE http://vm-host:8000/v1     # fish
+export CODESQUIRE_API_BASE=http://vm-host:8000/v1      # bash/zsh
 ```
 
 Pointing vLLM at the internet instead of a tunnel would expose an endpoint that runs
@@ -148,7 +158,7 @@ nothing executes unattended by accident.
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--api-base` | `$CODESQUIRE_API_BASE`, else `localhost:8080` then `localhost:8000` | vLLM OpenAI endpoint |
+| `--api-base` | `$CODESQUIRE_API_BASE`, else `localhost:8000` then `localhost:8080` | vLLM OpenAI endpoint |
 | `-m`, `--model` | first model the server reports | model id |
 | `-C`, `--cwd` | current directory | where commands run |
 | `--docker` | off | run commands in a throwaway container; implies `-y` |
@@ -216,5 +226,5 @@ as running anything.
 python3 cli/test_codesquire.py
 ```
 
-139 checks over the parsing, prompt, observation, trimming, risk and sandbox helpers. The
+141 checks over the parsing, prompt, observation, trimming, risk and sandbox helpers. The
 agent loop itself is exercised by hand against a mock vLLM server and a live one.

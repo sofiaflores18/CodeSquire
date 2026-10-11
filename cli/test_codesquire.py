@@ -243,8 +243,8 @@ check("short_path does not maul a lookalike",
 # --- endpoint resolution, with the server stubbed out (no sockets opened)
 import os as _os
 _saved = _os.environ.pop("CODESQUIRE_API_BASE", None)
-check("default endpoints try 8080 then 8000", c.default_endpoints(),
-      ["http://localhost:8080/v1", "http://localhost:8000/v1"])
+check("default endpoints try 8000 then 8080", c.default_endpoints(),
+      ["http://localhost:8000/v1", "http://localhost:8080/v1"])
 _os.environ["CODESQUIRE_API_BASE"] = "http://vm:9999/v1"
 check("env var wins outright", c.default_endpoints(), ["http://vm:9999/v1"])
 _os.environ.pop("CODESQUIRE_API_BASE")
@@ -263,17 +263,17 @@ def _stub(serving):
 try:
     eight_thousand = "http://localhost:8000/v1"
     eighty_eighty = "http://localhost:8080/v1"
-    both = [eighty_eighty, eight_thousand]
+    both = [eight_thousand, eighty_eighty]
 
-    c.discover_model = _stub(eighty_eighty)
-    cfg, model, length = c.resolve_endpoint(c.Config(), both)
-    check("picks 8080 when it answers", (cfg.api_base, model, length),
-          (eighty_eighty, "codesquire/qwen3-8b-sft", 16384))
-
-    # The tunnel is not up but a local vLLM is: fall through rather than fail.
     c.discover_model = _stub(eight_thousand)
+    cfg, model, length = c.resolve_endpoint(c.Config(), both)
+    check("picks 8000 when it answers", (cfg.api_base, model, length),
+          (eight_thousand, "codesquire/qwen3-8b-sft", 16384))
+
+    # 8000 is dead but something serves on 8080: fall through rather than fail.
+    c.discover_model = _stub(eighty_eighty)
     cfg, _, _ = c.resolve_endpoint(c.Config(), both)
-    check("falls through to 8000", cfg.api_base, eight_thousand)
+    check("falls through to 8080", cfg.api_base, eighty_eighty)
 
     # An explicit --api-base is the only candidate, so its own error is the message.
     c.discover_model = _stub(eighty_eighty)
@@ -301,7 +301,62 @@ check("api-base default is None", c.build_parser().parse_args(["t"]).api_base, N
 check("api-base passthrough",
       c.build_parser().parse_args(["--api-base", "http://h:1/v1", "t"]).api_base,
       "http://h:1/v1")
-check("port constants", c.DEFAULT_PORTS, (8080, 8000))
+check("port constants", c.DEFAULT_PORTS, (8000, 8080))
+
+# A port that accepts the connection and then drops it -- an ssh tunnel whose far end
+# is not serving -- raises ConnectionResetError from deep inside http.client rather
+# than URLError. It has to arrive as a ServerError, or endpoint resolution crashes
+# with a traceback instead of trying the next candidate.
+import socket
+import threading
+
+def _slammed_port():
+    """A listening socket that accepts a connection and resets it immediately."""
+    listener = socket.socket()
+    listener.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+
+    def slam():
+        try:
+            conn, _ = listener.accept()
+            conn.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+            conn.close()
+        except OSError:
+            pass
+
+    thread = threading.Thread(target=slam, daemon=True)
+    thread.start()
+    return listener, listener.getsockname()[1]
+
+import struct
+_sock, _port = _slammed_port()
+try:
+    dead = f"http://127.0.0.1:{_port}/v1"
+    try:
+        c.discover_model(c.Config(api_base=dead))
+        check("reset becomes ServerError", True, False)
+    except c.ServerError as error:
+        check("reset becomes ServerError", "Cannot reach the model server" in str(error), True)
+    except Exception as error:                      # noqa: BLE001 - the bug being guarded
+        check(f"reset becomes ServerError (got {type(error).__name__})", True, False)
+finally:
+    _sock.close()
+
+# And resolution must then move on to a candidate that does answer.
+_sock, _port = _slammed_port()
+try:
+    dead = f"http://127.0.0.1:{_port}/v1"
+    live = "http://localhost:8000/v1"
+    _saved = c.discover_model
+    c.discover_model = _stub(live)
+    try:
+        cfg, _, _ = c.resolve_endpoint(c.Config(), [dead, live])
+        check("dead tunnel falls through", cfg.api_base, live)
+    finally:
+        c.discover_model = _saved
+finally:
+    _sock.close()
 
 # --- the loop guards: a format-error loop must not bypass them
 check("nudge before stop", c.NUDGE_AFTER < c.STOP_AFTER, True)

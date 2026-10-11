@@ -104,37 +104,16 @@ class CodeSquireTrainer:
                 "dtype": torch.bfloat16,
                 "attn_implementation": "sdpa",
             },
-            # Trajectories are ~9k tokens; at the old 1024 every example was cut off
-            # inside the user turn, so the model never saw an assistant token.
             max_length=max_length,
-            # The system and user turns are context, not targets. Masking them keeps
-            # the gradient on the assistant turns instead of on the instruction
-            # boilerplate, which is identical across every example in this dataset.
-            # Qwen3's stock template has no {% generation %} markers, but TRL
-            # swaps in a patched one that does, so the mask lands on the
-            # assistant turns (verified: 14 spans for 14 assistant turns).
             assistant_only_loss=True,
             learning_rate=1e-5,
             num_train_epochs=2,
             eval_strategy="steps",
             eval_steps=25,
             logging_steps=5,
-            # Disk, not VRAM, is the binding constraint on this box (146GB total).
-            # A full-finetune checkpoint is ~15.3GiB of weights plus ~61GiB of fp32
-            # AdamW state; writing the optimizer state filled the disk mid-write and
-            # killed a run, so:
-            #   save_only_model   drops the 61GiB optimizer state
-            #   save_strategy     saves only when eval_loss improves, instead of
-            #                     every 50 steps
-            #   save_total_limit  every "best" save is the newest, so rotation
-            #                     protects one checkpoint and keeps exactly one
-            # Rotation runs after the new checkpoint is written, so peak usage is
-            # 2 x 15.3 = ~31GiB rather than 5 unbounded ~77GiB checkpoints.
             save_only_model=True,
             save_strategy="best",
             save_total_limit=1,
-            # Required by save_strategy="best"; also makes the end-of-run weights
-            # the best ones rather than whatever the last step happened to produce.
             metric_for_best_model="eval_loss",
             greater_is_better=False,
             load_best_model_at_end=True,
@@ -156,9 +135,6 @@ class CodeSquireTrainer:
         return training_args
 
     def save_final_model(self):
-        # load_best_model_at_end leaves the best weights loaded, so this writes
-        # them to outputs/ itself. Without it the only copy lives in a checkpoint
-        # directory that rotation is free to delete on a later run.
         self.trainer.save_model(OUTPUT_DIR)
         print(f"Best model written to {OUTPUT_DIR}/")
 
@@ -167,19 +143,12 @@ class CodeSquireTrainer:
         self.trainer.train()
         self.save_final_model()
 
-    def resume_training_from_checkpoint(
-        self, checkpoint_path, model_name, num_samples, max_length, eval_fraction
-    ):
-        # Resolve and health-check the checkpoint before paying to build the
-        # trainer and tokenize the dataset, so a bad path fails in a second
-        # rather than after the model is on the GPU.
+    def resume_training_from_checkpoint(self, checkpoint_path, model_name, num_samples, max_length, eval_fraction):
+        
         checkpoint = resolve_checkpoint(checkpoint_path)
         print(f"Resuming from {checkpoint}")
 
-        # The trainer has to exist before it can resume, so build it the same way
-        # a fresh run does and let the checkpoint restore the weights. With
-        # save_only_model=True there is no optimizer state to restore, so the
-        # optimizer restarts and the LR schedule is recomputed from the step count.
+        
         training_args = self.build(model_name, num_samples, max_length, eval_fraction)
         warn_if_split_changed(checkpoint, self.train_examples, training_args)
         self.trainer.train(resume_from_checkpoint=str(checkpoint))
