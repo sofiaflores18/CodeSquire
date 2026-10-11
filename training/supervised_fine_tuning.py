@@ -119,14 +119,25 @@ class CodeSquireTrainer:
             eval_strategy="steps",
             eval_steps=25,
             logging_steps=5,
-            save_strategy="steps",
-            save_steps=50,
-            # A full-finetune checkpoint is ~16GB of weights plus ~64GB of fp32
-            # AdamW state. Keeping the optimizer state for every checkpoint
-            # filled the disk mid-write and killed the run, so save weights only
-            # and keep just the last two.
+            # Disk, not VRAM, is the binding constraint on this box (146GB total).
+            # A full-finetune checkpoint is ~15.3GiB of weights plus ~61GiB of fp32
+            # AdamW state; writing the optimizer state filled the disk mid-write and
+            # killed a run, so:
+            #   save_only_model   drops the 61GiB optimizer state
+            #   save_strategy     saves only when eval_loss improves, instead of
+            #                     every 50 steps
+            #   save_total_limit  every "best" save is the newest, so rotation
+            #                     protects one checkpoint and keeps exactly one
+            # Rotation runs after the new checkpoint is written, so peak usage is
+            # 2 x 15.3 = ~31GiB rather than 5 unbounded ~77GiB checkpoints.
             save_only_model=True,
-            save_total_limit=2,
+            save_strategy="best",
+            save_total_limit=1,
+            # Required by save_strategy="best"; also makes the end-of-run weights
+            # the best ones rather than whatever the last step happened to produce.
+            metric_for_best_model="eval_loss",
+            greater_is_better=False,
+            load_best_model_at_end=True,
             report_to="none",
         )
         splits = data_preprocessing_SFT(
@@ -144,9 +155,17 @@ class CodeSquireTrainer:
         )
         return training_args
 
+    def save_final_model(self):
+        # load_best_model_at_end leaves the best weights loaded, so this writes
+        # them to outputs/ itself. Without it the only copy lives in a checkpoint
+        # directory that rotation is free to delete on a later run.
+        self.trainer.save_model(OUTPUT_DIR)
+        print(f"Best model written to {OUTPUT_DIR}/")
+
     def train(self, model_name, num_samples, max_length, eval_fraction):
         self.build(model_name, num_samples, max_length, eval_fraction)
         self.trainer.train()
+        self.save_final_model()
 
     def resume_training_from_checkpoint(
         self, checkpoint_path, model_name, num_samples, max_length, eval_fraction
@@ -164,6 +183,7 @@ class CodeSquireTrainer:
         training_args = self.build(model_name, num_samples, max_length, eval_fraction)
         warn_if_split_changed(checkpoint, self.train_examples, training_args)
         self.trainer.train(resume_from_checkpoint=str(checkpoint))
+        self.save_final_model()
 
 
 # Command line arguments to pass in model name, number of samples to train on, and a resume flag 

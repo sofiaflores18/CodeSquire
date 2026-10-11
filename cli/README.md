@@ -1,5 +1,37 @@
 # CodeSquire CLI
 
+## Get started
+
+```bash
+# 1. On the VM -- serve the fine-tuned model, and leave it running
+vllm serve Adammouedden/codesquire --port 8000 --max-model-len 16384
+
+# 2. On your machine -- forward the VM's port 8000 to yours, and leave it running
+ssh -N -L 8000:localhost:8000 <user>@<vm-host>
+
+# 3. On your machine -- check the model is reachable (expect a JSON list of models)
+curl http://localhost:8000/v1/models
+
+# 4. In the project you want it to work on -- ask it for something
+cd ~/your/project
+~/PROJECTS/CodeSquire/cli/codesquire.py --docker "write a script that prints the first 10 primes, then run it"
+```
+
+That is everything. If vLLM is already serving on `localhost:8000`, skip steps 1 and 2.
+
+Two things worth knowing about step 4: `--docker` runs the agent's commands in a
+throwaway container that shares only the current directory, and the first run pulls
+`python:3.12-slim` (~130 MB), so it takes a moment. Drop `--docker` to run commands
+directly on your machine, where each one asks for approval first.
+
+Optional, so you can type `codesquire` anywhere:
+
+```bash
+ln -s ~/PROJECTS/CodeSquire/cli/codesquire.py ~/.local/bin/codesquire
+```
+
+---
+
 Prompt the CodeSquire agent from your terminal and let it work in your project. Ask it
 anything — write a script, change some code, explain a codebase, run a command, answer a
 question. The agent runs on the VM's vLLM server; this CLI is the other half of the loop
