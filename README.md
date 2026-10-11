@@ -1,5 +1,12 @@
 # CodeSquire SWE-bench runner
 
+Evaluation harness for the CodeSquire agent. To *use* the agent on your own code instead
+of benchmarking it, see [cli/README.md](cli/README.md):
+
+```bash
+./cli/codesquire.py "add type hints to utils.py"
+```
+
 ## Instance setup
 
 Install Docker with working non-root access, uv, and the NVIDIA driver required by your

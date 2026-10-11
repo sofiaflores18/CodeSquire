@@ -1,5 +1,7 @@
 # Generated benchmark artifacts
 /runs/
+# Training checkpoints (15-46GB each); upload_model.sh stays tracked
+/outputs/checkpoint-*/
 /artifacts/
 /gold.*.json
 /openai__*.json
