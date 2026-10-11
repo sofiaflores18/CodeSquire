@@ -3,7 +3,7 @@ agent:
 environment:
   pull_timeout: 600
 model:
-  model_name: "openai/Qwen/Qwen2.5-3B-Instruct"
+  model_name: "openai/Qwen/Qwen-3-8B"
   cost_tracking: "ignore_errors"
   model_kwargs:
     api_base: "http://localhost:8000/v1"
