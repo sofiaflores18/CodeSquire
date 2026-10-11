@@ -1,8 +1,8 @@
-from trl import SFTTrainer
+from trl import SFTTrainer, SFTConfig
+import torch
 from datasets import load_dataset
 from data_preprocessing import data_preprocessing_SFT
 import click
-from transformers import TrainingArguments
 
 
 class CodeSquireTrainer:
@@ -10,8 +10,21 @@ class CodeSquireTrainer:
         self.trainer = None
 
     def train(self, model_name, num_samples):
-        
-        training_args = TrainingArguments(output_dir="outputs",save_strategy="steps",save_steps=50)
+        training_args = SFTConfig(
+            output_dir="outputs",
+            per_device_train_batch_size=1,
+            gradient_accumulation_steps=8,
+            gradient_checkpointing=True,
+            bf16=True,
+            model_init_kwargs={
+                "dtype": torch.bfloat16,
+                "attn_implementation": "sdpa",
+            },
+            max_length=1024,
+            save_strategy="steps",
+            save_steps=50,
+            report_to="none",
+        )
         dataset = data_preprocessing_SFT(num_samples)
         self.trainer = SFTTrainer(model=model_name, train_dataset=dataset, args=training_args)
         self.trainer.train()
