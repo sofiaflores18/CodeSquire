@@ -1,0 +1,18 @@
+# Qwen/Qwen3-8B, non-thinking mode. Layered after swebench.yaml by run_eval.py.
+vllm:
+  max_model_len: 40960   # = max_position_embeddings in the model config
+agent:
+  step_limit: 50
+model:
+  model_kwargs:
+    # Qwen's recommended non-thinking sampling. Greedy (temperature 0) made the
+    # agent repeat one command until the step limit.
+    temperature: 0.7
+    top_p: 0.8
+    max_tokens: 2048
+    extra_body:
+      top_k: 20          # vLLM-specific, so it goes in the request body
+      min_p: 0.0
+      # Qwen3 thinks by default; this tells its chat template to skip <think>.
+      chat_template_kwargs:
+        enable_thinking: false
