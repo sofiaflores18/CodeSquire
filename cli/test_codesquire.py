@@ -161,5 +161,167 @@ b = c.Agent(c.Config())
 b.follow_up("cold start")
 check("follow-up on empty starts fresh", [m["role"] for m in b.messages], ["system", "user"])
 
+# --- the startup banner
+check("wordmark has 6 rows", len(c.WORDMARK), 6)
+check("wordmark rows are equal width", {len(row) for row in c.WORDMARK}, {c.WORDMARK_WIDTH})
+check("wordmark width is 78", c.WORDMARK_WIDTH, 78)
+check("wordmark has no tabs or newlines",
+      any("\t" in row or "\n" in row for row in c.WORDMARK), False)
+
+import io as _io, contextlib as _ctx, shutil as _shutil
+_saved_style, _saved_size = c.S, c.shutil.get_terminal_size
+
+def _banner_at(columns, enabled, **config):
+    """Render the banner at a given width and return it with colour stripped."""
+    import re as _re, os as _os
+    c.S = c.Style(enabled)
+    c.shutil.get_terminal_size = lambda default=(80, 24): _os.terminal_size((columns, 24))
+    buffer = _io.StringIO()
+    settings = dict(api_base="http://localhost:8080/v1", model="m",
+                    cwd=_os.path.expanduser("~/proj"), max_context_tokens=16384)
+    settings.update(config)
+    with _ctx.redirect_stdout(buffer):
+        c.print_banner(c.Config(**settings), None)
+    raw = buffer.getvalue()
+    return raw, _re.sub(r"\x1b\[[0-9;]*m", "", raw)
+
+try:
+    _os_env = __import__("os").environ
+    _saved_term, _saved_colorterm = _os_env.get("TERM"), _os_env.get("COLORTERM")
+    _os_env["TERM"] = "xterm-256color"
+    c.S = c.Style(True)
+    check("gradient has one colour per row", len(c.gradient()), len(c.WORDMARK))
+    c.S = c.Style(False)
+    check("gradient empty when colour is off", c.gradient(), ())
+    if _saved_term is None: _os_env.pop("TERM", None)
+    else: _os_env["TERM"] = _saved_term
+    if _saved_colorterm is None: _os_env.pop("COLORTERM", None)
+    else: _os_env["COLORTERM"] = _saved_colorterm
+
+    # Wide: the art is drawn, and no line overflows the terminal.
+    raw, plain = _banner_at(100, True)
+    check("wide banner draws the art", c.WORDMARK[0].strip() in plain, True)
+    check("wide banner fits the terminal",
+          max(len(line) for line in plain.splitlines()) <= 100, True)
+    check("wide banner is coloured", "\x1b[" in raw, True)
+
+    # Narrow: the art would wrap, so the name goes on one line instead.
+    raw, plain = _banner_at(50, True)
+    check("narrow banner skips the art", c.WORDMARK[0].strip() in plain, False)
+    check("narrow banner still names it", "CodeSquire" in plain, True)
+    check("narrow banner fits", max(len(line) for line in plain.splitlines()) <= 50, True)
+
+    # Exactly at the boundary the art must still not wrap.
+    _, plain = _banner_at(c.WORDMARK_WIDTH + 2, True)
+    check("boundary width fits",
+          max(len(line) for line in plain.splitlines()) <= c.WORDMARK_WIDTH + 2, True)
+
+    # NO_COLOR: art yes, escape codes no.
+    raw, plain = _banner_at(100, False)
+    check("no-colour banner has no escapes", "\x1b[" in raw, False)
+    check("no-colour banner keeps the art", c.WORDMARK[0].strip() in plain, True)
+
+    # Every label lines up in one column, and each has a gap before its value.
+    _, plain = _banner_at(100, False, docker_image="python:3.12-slim", auto_approve=True)
+    for label in ("model", "server", "cwd", "sandbox", "approval"):
+        row = next((line for line in plain.splitlines() if line.startswith(f"  {label}")), None)
+        check(f"banner row {label!r} present", row is not None, True)
+        if row:
+            check(f"banner row {label!r} has a gap", row[2 + len(label)] == " ", True)
+    check("banner reports the sandbox", "python:3.12-slim" in plain, True)
+    check("banner warns approval is off", "run without asking" in plain, True)
+finally:
+    c.S, c.shutil.get_terminal_size = _saved_style, _saved_size
+
+check("short_path collapses home",
+      c.short_path(__import__("os").path.expanduser("~/x/y")), "~/x/y")
+check("short_path leaves other paths", c.short_path("/etc/hosts"), "/etc/hosts")
+check("short_path does not maul a lookalike",
+      c.short_path(__import__("os").path.expanduser("~") + "-other"),
+      __import__("os").path.expanduser("~") + "-other")
+
+# --- endpoint resolution, with the server stubbed out (no sockets opened)
+import os as _os
+_saved = _os.environ.pop("CODESQUIRE_API_BASE", None)
+check("default endpoints try 8080 then 8000", c.default_endpoints(),
+      ["http://localhost:8080/v1", "http://localhost:8000/v1"])
+_os.environ["CODESQUIRE_API_BASE"] = "http://vm:9999/v1"
+check("env var wins outright", c.default_endpoints(), ["http://vm:9999/v1"])
+_os.environ.pop("CODESQUIRE_API_BASE")
+if _saved is not None:
+    _os.environ["CODESQUIRE_API_BASE"] = _saved
+
+_real_discover = c.discover_model
+def _stub(serving):
+    """Pretend only `serving` answers."""
+    def discover(cfg):
+        if cfg.api_base == serving:
+            return "codesquire/qwen3-8b-sft", 16384
+        raise c.ServerError(f"Cannot reach the model server at {cfg.api_base} (refused).")
+    return discover
+
+try:
+    eight_thousand = "http://localhost:8000/v1"
+    eighty_eighty = "http://localhost:8080/v1"
+    both = [eighty_eighty, eight_thousand]
+
+    c.discover_model = _stub(eighty_eighty)
+    cfg, model, length = c.resolve_endpoint(c.Config(), both)
+    check("picks 8080 when it answers", (cfg.api_base, model, length),
+          (eighty_eighty, "codesquire/qwen3-8b-sft", 16384))
+
+    # The tunnel is not up but a local vLLM is: fall through rather than fail.
+    c.discover_model = _stub(eight_thousand)
+    cfg, _, _ = c.resolve_endpoint(c.Config(), both)
+    check("falls through to 8000", cfg.api_base, eight_thousand)
+
+    # An explicit --api-base is the only candidate, so its own error is the message.
+    c.discover_model = _stub(eighty_eighty)
+    try:
+        c.resolve_endpoint(c.Config(), ["http://elsewhere:1234/v1"])
+        check("single candidate raises", True, False)
+    except c.ServerError as error:
+        check("single candidate names it", "http://elsewhere:1234/v1" in str(error), True)
+        check("single candidate gives help", "ssh -p" in str(error), True)
+
+    # Nothing answers: the report has to name every port tried, not just the last.
+    c.discover_model = _stub("http://nothing/v1")
+    try:
+        c.resolve_endpoint(c.Config(), both)
+        check("all-fail raises", True, False)
+    except c.ServerError as error:
+        check("all-fail names 8080", eighty_eighty in str(error), True)
+        check("all-fail names 8000", eight_thousand in str(error), True)
+        check("all-fail gives help", "vllm serve" in str(error), True)
+finally:
+    c.discover_model = _real_discover
+
+# --api-base must have no baked-in default, or the probe never runs.
+check("api-base default is None", c.build_parser().parse_args(["t"]).api_base, None)
+check("api-base passthrough",
+      c.build_parser().parse_args(["--api-base", "http://h:1/v1", "t"]).api_base,
+      "http://h:1/v1")
+check("port constants", c.DEFAULT_PORTS, (8080, 8000))
+
+# --- the loop guards: a format-error loop must not bypass them
+check("nudge before stop", c.NUDGE_AFTER < c.STOP_AFTER, True)
+check("format retries below stop", c.FORMAT_RETRIES < c.STOP_AFTER, True)
+g = c.Agent(c.Config())
+g.start("t")
+for attribute in ("last_command", "repeats", "last_response", "response_repeats", "format_errors"):
+    check(f"guard state {attribute} exists", hasattr(g, attribute), True)
+# A new request must not inherit the previous one's strike count.
+g.repeats, g.response_repeats, g.format_errors = 7, 7, 7
+g.last_command, g.last_response = "ls", "x"
+g.follow_up("next")
+check("follow-up resets command repeats", (g.repeats, g.last_command), (0, ""))
+check("follow-up resets response repeats", (g.response_repeats, g.last_response), (0, ""))
+check("follow-up resets format errors", g.format_errors, 0)
+g2 = c.Agent(c.Config())
+g2.repeats, g2.response_repeats, g2.format_errors = 7, 7, 7
+g2.start("fresh")
+check("start resets all strike counts",
+      (g2.repeats, g2.response_repeats, g2.format_errors), (0, 0, 0))
+
 print(f"\n{ok} passed, {fail} failed")
 sys.exit(1 if fail else 0)

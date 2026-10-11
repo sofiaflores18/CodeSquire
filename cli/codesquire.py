@@ -33,8 +33,20 @@ from pathlib import Path
 
 VERSION = "0.1.0"
 
-DEFAULT_API_BASE = os.environ.get("CODESQUIRE_API_BASE", "http://localhost:8000/v1")
 DEFAULT_API_KEY = os.environ.get("CODESQUIRE_API_KEY", os.environ.get("OPENAI_API_KEY", "EMPTY"))
+
+# Where to look when nobody says. 8080 is the port the VM tunnel forwards; 8000 is vLLM's
+# own default and what run_eval.py uses locally. Trying both means the demo works either
+# way instead of failing with a connection error that looks like the server is down.
+DEFAULT_PORTS = (8080, 8000)
+
+
+def default_endpoints() -> list[str]:
+    """Endpoints to try, in order, when no --api-base was given."""
+    configured = os.environ.get("CODESQUIRE_API_BASE")
+    if configured:
+        return [configured]
+    return [f"http://localhost:{port}/v1" for port in DEFAULT_PORTS]
 
 SUBMIT_MARKER = "COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT"
 
@@ -73,6 +85,95 @@ class Style:
 
 
 S = Style(sys.stdout.isatty() and not os.environ.get("NO_COLOR"))
+
+
+# Six rows, 78 columns, every row the same width. Shown only when the terminal is wide
+# enough; a narrower one gets the name on a single line instead of a wrapped mess.
+WORDMARK = (
+    " ██████╗ ██████╗ ██████╗ ███████╗███████╗ ██████╗ ██╗   ██╗██╗██████╗ ███████╗",
+    "██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔════╝██╔═══██╗██║   ██║██║██╔══██╗██╔════╝",
+    "██║     ██║   ██║██║  ██║█████╗  ███████╗██║   ██║██║   ██║██║██████╔╝█████╗  ",
+    "██║     ██║   ██║██║  ██║██╔══╝  ╚════██║██║▄▄ ██║██║   ██║██║██╔══██╗██╔══╝  ",
+    "╚██████╗╚██████╔╝██████╔╝███████╗███████║╚██████╔╝╚██████╔╝██║██║  ██║███████╗",
+    " ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝ ╚══▀▀═╝  ╚═════╝ ╚═╝╚═╝  ╚═╝╚══════╝",
+)
+WORDMARK_WIDTH = len(WORDMARK[0])
+
+
+def gradient() -> tuple[str, ...]:
+    """One colour per wordmark row, blue to magenta.
+
+    256-colour codes look best but are not universal, so a terminal that does not
+    advertise them gets the basic-colour approximation instead of possible garbage.
+    """
+    if not S.enabled:
+        return ()
+    rich = "256color" in os.environ.get("TERM", "") or bool(os.environ.get("COLORTERM"))
+    if rich:
+        return ("38;5;39", "38;5;75", "38;5;111", "38;5;141", "38;5;177", "38;5;213")
+    return ("96", "36", "36", "35", "35", "95")
+
+
+def short_path(path: str) -> str:
+    home = os.path.expanduser("~")
+    return "~" + path[len(home):] if path == home or path.startswith(home + os.sep) else path
+
+
+def print_banner(cfg: Config, sandbox: "Sandbox | None") -> None:
+    """The splash an interactive session opens with."""
+    width = shutil.get_terminal_size((80, 24)).columns
+    colours = gradient()
+
+    if width >= WORDMARK_WIDTH + 2:
+        indent = "  " if width >= WORDMARK_WIDTH + 4 else ""
+        print()
+        for row, code in zip(WORDMARK, colours or ("",) * len(WORDMARK)):
+            print(indent + (S(row, code) if code else row))
+    else:
+        name = "CodeSquire"
+        if colours:
+            # Bold has to go on each character: one reset inside the string would
+            # otherwise cancel a single bold wrapped around the whole thing.
+            print("\n  " + "".join(S(char, "1", colours[index * len(colours) // len(name)])
+                                   for index, char in enumerate(name)))
+        else:
+            print("\n  " + S.bold(name))
+
+    # Wide enough for the longest label ("approval") plus a gap before the value.
+    column = 9
+    # One column of slack: a line that exactly fills the terminal leaves the cursor in
+    # a wrapped state, which some terminals turn into a stray blank line.
+    room = max(width - 3 - column, 20)
+
+    def fit(value: str, keep_tail: bool = False) -> str:
+        """Trim a value to the terminal, keeping the end of a path and the start of a name."""
+        if len(value) <= room:
+            return value
+        return "\u2026" + value[-(room - 1):] if keep_tail else value[:room - 1] + "\u2026"
+
+    context = f"  (context {cfg.max_context_tokens:,})"
+    rows = [
+        ("model", fit(cfg.model, keep_tail=True)),
+        # The annotation is the first thing to go when the line will not fit.
+        ("server", cfg.api_base + context if len(cfg.api_base + context) <= room
+                   else fit(cfg.api_base)),
+        ("cwd", fit(short_path(cfg.cwd), keep_tail=True)),
+    ]
+    if cfg.docker_image:
+        detail = "shares the cwd only" if cfg.network else "shares the cwd only, no network"
+        full = f"{cfg.docker_image}  ({detail})"
+        rows.append(("sandbox", full if len(full) <= room else fit(cfg.docker_image)))
+    print(S.dim(f"  v{VERSION}"))
+    for label, value in rows:
+        print(S.dim(f"  {label:<{column}}") + value)
+    if cfg.docker_image and sandbox is not None and sandbox.missing:
+        print(S.dim(f"  {'missing':<{column}}")
+              + S.dim(fit(", ".join(sandbox.missing) + " (not in this image)")))
+    if cfg.auto_approve:
+        print(S.dim(f"  {'approval':<{column}}")
+              + S.yellow(fit("off — commands run without asking")))
+    print()
+    print(S.dim("  /help for commands, /exit to quit"))
 
 
 def rule(label: str = "") -> str:
@@ -286,6 +387,8 @@ submit your solution (you will not be able to continue working on this task afte
 # give up if the nudge does not land.
 NUDGE_AFTER = 3
 STOP_AFTER = 8
+# Consecutive malformed responses to ask about before working with what was sent.
+FORMAT_RETRIES = 2
 
 REPEAT_NUDGE = (
     "\n<warning>\nYou have now run this exact command {count} times and the result is not "
@@ -325,7 +428,7 @@ def format_observation(returncode: int, output: str) -> str:
 
 @dataclass
 class Config:
-    api_base: str = DEFAULT_API_BASE
+    api_base: str = ""                  # resolved from --api-base, the env var, or a probe
     api_key: str = DEFAULT_API_KEY
     model: str = ""
     temperature: float = 0.7
@@ -368,15 +471,39 @@ def _request(url: str, cfg: Config, payload: dict | None = None, timeout: int | 
         body = error.read().decode("utf-8", "replace")[:2000]
         raise ServerError(f"HTTP {error.code} from {url}\n{body}") from None
     except urllib.error.URLError as error:
-        raise ServerError(
-            f"Cannot reach the model server at {cfg.api_base} ({error.reason}).\n"
-            "Start it on the VM (see scripts/vllm_onstart.sh), or point this CLI at it:\n"
-            "  codesquire --api-base http://<vm-host>:8000/v1\n"
-            "For a remote VM, an SSH tunnel keeps the port private:\n"
-            "  ssh -N -L 8000:localhost:8000 <user>@<vm-host>"
-        ) from None
+        raise ServerError(f"Cannot reach the model server at {cfg.api_base} ({error.reason}).") from None
     except TimeoutError:
         raise ServerError(f"Request to {url} timed out after {timeout or cfg.request_timeout}s") from None
+
+
+UNREACHABLE_HELP = """\
+Open the tunnel to the VM and start vLLM inside that session
+(the exact commands for this project are in cli/README.md):
+  ssh -p <ssh-port> root@<vm-host> -L 8080:localhost:8080
+  vllm serve <model> --port 8080 --max-model-len 16384
+Already serving somewhere else? Name it:
+  codesquire --api-base http://<host>:<port>/v1"""
+
+
+def resolve_endpoint(cfg: Config, candidates: list[str]) -> tuple[Config, str, int | None]:
+    """Settle on the endpoint that is actually serving, and what it serves.
+
+    With one candidate its error is the whole story. With several, all of them failing
+    is the interesting case, so the report names each one rather than only the last.
+    """
+    failures = []
+    for base in candidates:
+        probe = replace(cfg, api_base=base)
+        try:
+            model_id, length = discover_model(probe)
+            return probe, model_id, length
+        except ServerError as error:
+            failures.append((base, error))
+
+    if len(failures) == 1:
+        raise ServerError(f"{failures[0][1]}\n\n{UNREACHABLE_HELP}")
+    tried = "\n".join(f"  {base}" for base, _ in failures)
+    raise ServerError(f"No model server responded. Tried:\n{tried}\n\n{UNREACHABLE_HELP}")
 
 
 def discover_model(cfg: Config) -> tuple[str, int | None]:
@@ -819,6 +946,9 @@ class Agent:
         self.steps = 0
         self.last_command = ""
         self.repeats = 0
+        self.last_response = ""
+        self.response_repeats = 0
+        self.format_errors = 0
 
     def start(self, task: str) -> None:
         sandbox_note = self.sandbox.note() if self.sandbox is not None else ""
@@ -837,6 +967,7 @@ class Agent:
         ]
         self.steps = 0
         self.last_command, self.repeats = "", 0
+        self.last_response, self.response_repeats, self.format_errors = "", 0, 0
 
     def follow_up(self, task: str) -> None:
         """Add a new request to an existing conversation, keeping what came before.
@@ -854,6 +985,7 @@ class Agent:
         self.messages.append({"role": "user", "content": FOLLOW_UP_TEMPLATE.format(task=task.strip())})
         self.steps = 0
         self.last_command, self.repeats = "", 0
+        self.last_response, self.response_repeats, self.format_errors = "", 0, 0
 
     def _query(self) -> tuple[str, str]:
         """One model turn, streamed but stopping the display at the code fence."""
@@ -922,14 +1054,22 @@ class Agent:
             return "quit"
         self.messages.append({"role": "assistant", "content": text or ""})
 
+        answer = strip_reasoning(text).strip()
+        self.response_repeats = self.response_repeats + 1 if answer == self.last_response else 1
+        self.last_response = answer
+        if self.response_repeats >= STOP_AFTER:
+            print(S.red(f"  stuck: {self.response_repeats} identical responses in a row, giving up"))
+            return "stuck"
+
         actions = parse_actions(text)
         if not actions:
-            if finish_reason == "length":
+            if finish_reason == "length" and self.format_errors < FORMAT_RETRIES:
                 # Cut off mid-sentence, so this is an unfinished turn, not an answer.
+                self.format_errors += 1
                 print(S.yellow("  response was cut off before a command; asking again"))
                 self.messages.append({"role": "user", "content": LENGTH_ERROR})
                 return "continue"
-            if strip_reasoning(text).strip():
+            if answer:
                 # A reply with no command is the model answering directly, which is the
                 # right move for a question that needs no shell at all.
                 print(S.green("  ✓ answered"))
@@ -941,7 +1081,8 @@ class Agent:
                     error="Your response was empty.", count=0),
             })
             return "continue"
-        if len(actions) > 1:
+        if len(actions) > 1 and self.format_errors < FORMAT_RETRIES:
+            self.format_errors += 1
             print(S.yellow(f"  {len(actions)} bash blocks in one response; asking for one"))
             self.messages.append({
                 "role": "user",
@@ -951,6 +1092,11 @@ class Agent:
                 ),
             })
             return "continue"
+        if len(actions) > 1:
+            # Asking did not work, so take the first block and keep moving. The next
+            # step gets the result and can run whatever was in the others.
+            print(S.yellow(f"  still {len(actions)} blocks; running the first one only"))
+        self.format_errors = 0
 
         command = actions[0]
         if is_submit(command):
@@ -1067,16 +1213,7 @@ def interactive(cfg: Config, sandbox: Sandbox | None = None) -> int:
     except ImportError:
         history = None
 
-    print(S.bold(S.magenta("CodeSquire")) + S.dim(f" {VERSION}  ·  {cfg.model}"))
-    print(S.dim(f"  {cfg.api_base}  ·  cwd {cfg.cwd}  ·  context {cfg.max_context_tokens}"))
-    if cfg.docker_image:
-        print(S.dim("  sandbox: ") + S.green(cfg.docker_image) +
-              S.dim(f"  ·  shares {cfg.cwd}") + ("" if cfg.network else S.dim("  ·  no network")))
-        if sandbox is not None and sandbox.missing:
-            print(S.dim("  not in this image: " + ", ".join(sandbox.missing)))
-    if cfg.auto_approve:
-        print(S.yellow("  commands run without asking (--yes)"))
-    print(S.dim("  /help for commands, /exit to quit"))
+    print_banner(cfg, sandbox)
 
     agent = Agent(cfg, sandbox)
     while True:
@@ -1143,8 +1280,9 @@ def build_parser() -> argparse.ArgumentParser:
         epilog="With no PROMPT, starts an interactive session.",
     )
     parser.add_argument("prompt", nargs="*", help="the task for the agent")
-    parser.add_argument("--api-base", default=DEFAULT_API_BASE,
-                        help=f"vLLM OpenAI endpoint (default: {DEFAULT_API_BASE})")
+    parser.add_argument("--api-base", default=None,
+                        help="vLLM OpenAI endpoint (default: $CODESQUIRE_API_BASE, else "
+                             "whichever of localhost:8080 and localhost:8000 answers)")
     parser.add_argument("--api-key", default=DEFAULT_API_KEY, help="bearer token, if the server needs one")
     parser.add_argument("-m", "--model", default="", help="model id (default: whatever the server serves)")
     parser.add_argument("-C", "--cwd", default=None, help="working directory for commands (default: here)")
@@ -1190,7 +1328,6 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     cfg = Config(
-        api_base=args.api_base,
         api_key=args.api_key,
         model=args.model,
         temperature=args.temperature,
@@ -1209,8 +1346,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.confirm:
         cfg.auto_approve = False
 
+    candidates = [args.api_base] if args.api_base else default_endpoints()
     try:
-        model_id, served_length = discover_model(cfg)
+        cfg, model_id, served_length = resolve_endpoint(cfg, candidates)
     except ServerError as error:
         print(S.red(str(error)), file=sys.stderr)
         return 1

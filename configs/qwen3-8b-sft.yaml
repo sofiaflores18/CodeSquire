@@ -1,0 +1,28 @@
+# SFT'd Qwen3-8B served from a local directory, graded with LOCAL Docker via
+# scripts/run_swebench.sh. Unlike configs/qwen3-8b.yaml (used by run_eval.py,
+# which injects the server plumbing and strips its `vllm:` block), this file is
+# passed straight to mini-swe-agent, so it carries the api_base itself and has
+# no `vllm:` section.
+#
+# model_name must match vLLM's --served-model-name, prefixed with `openai/`.
+agent:
+  step_limit: 50
+environment:
+  pull_timeout: 600
+model:
+  model_name: "openai/qwen3-8b-sft"
+  cost_tracking: "ignore_errors"
+  model_kwargs:
+    api_base: "http://localhost:8000/v1"
+    api_key: "local"
+    # Qwen's recommended non-thinking sampling. Greedy (temperature 0, as in
+    # configs/qwen.yaml) made the agent repeat one command until the step limit.
+    temperature: 0.7
+    top_p: 0.8
+    max_tokens: 2048
+    extra_body:
+      top_k: 20          # vLLM-specific, so it goes in the request body
+      min_p: 0.0
+      # Qwen3 thinks by default; this tells its chat template to skip <think>.
+      chat_template_kwargs:
+        enable_thinking: false

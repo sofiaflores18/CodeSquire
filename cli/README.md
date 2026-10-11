@@ -3,26 +3,31 @@
 ## Get started
 
 ```bash
-# 1. On the VM -- serve the fine-tuned model, and leave it running
-vllm serve Adammouedden/codesquire --port 8000 --max-model-len 16384
+# 1. Open a tunnel to the VM. Leave this terminal open.
+ssh -p 30018 root@47.150.239.19 -L 8080:localhost:8080
 
-# 2. On your machine -- forward the VM's port 8000 to yours, and leave it running
-ssh -N -L 8000:localhost:8000 <user>@<vm-host>
+# 2. In that same SSH session, serve the model. Leave it running.
+vllm serve Adammouedden/codesquire --port 8080 --max-model-len 16384
 
-# 3. On your machine -- check the model is reachable (expect a JSON list of models)
-curl http://localhost:8000/v1/models
+# 3. In a NEW terminal on your machine, check the model is reachable.
+#    Expect a JSON list with one model in it.
+curl http://localhost:8080/v1/models
 
-# 4. In the project you want it to work on -- ask it for something
+# 4. Still on your machine, go to the project you want it to work on and ask.
 cd ~/your/project
 ~/PROJECTS/CodeSquire/cli/codesquire.py --docker "write a script that prints the first 10 primes, then run it"
 ```
 
-That is everything. If vLLM is already serving on `localhost:8000`, skip steps 1 and 2.
+That is everything. Step 4 needs no `--api-base`: with nothing specified the CLI tries
+`localhost:8080` and then `localhost:8000`, so it finds the tunnel on its own.
 
 Two things worth knowing about step 4: `--docker` runs the agent's commands in a
 throwaway container that shares only the current directory, and the first run pulls
 `python:3.12-slim` (~130 MB), so it takes a moment. Drop `--docker` to run commands
 directly on your machine, where each one asks for approval first.
+
+The port has to agree in steps 1-3. The tunnel forwards 8080, so vLLM is told to serve
+on 8080 rather than its usual 8000; if you change one, change all three.
 
 Optional, so you can type `codesquire` anywhere:
 
@@ -43,19 +48,27 @@ reach the server.
 
 ## Setup
 
-Start the server on the VM (`scripts/vllm_onstart.sh`), then point the CLI at it:
+The tunnel in step 1 above is what keeps the model server off the public internet: vLLM
+listens on the VM's loopback only, and `-L 8080:localhost:8080` is the only way in. Run
+it in the background with `-N` if you would rather not keep a shell open:
 
 ```bash
-ssh -N -L 8000:localhost:8000 user@vm-host &   # keeps port 8000 off the public internet
+ssh -N -p 30018 root@47.150.239.19 -L 8080:localhost:8080 &
 ./cli/codesquire.py "add type hints to utils.py"
 ```
 
-For a server reachable directly, pass `--api-base` or set it once:
+If vLLM is not installed on the VM yet, `scripts/vllm_onstart.sh` sets it up.
+
+To reach a server on another host or port, pass `--api-base`, or set it once so you can
+stop passing it:
 
 ```bash
-set -Ux CODESQUIRE_API_BASE http://vm-host:8000/v1     # fish
-export CODESQUIRE_API_BASE=http://vm-host:8000/v1      # bash/zsh
+set -Ux CODESQUIRE_API_BASE http://vm-host:8080/v1     # fish
+export CODESQUIRE_API_BASE=http://vm-host:8080/v1      # bash/zsh
 ```
+
+Pointing vLLM at the internet instead of a tunnel would expose an endpoint that runs
+shell commands on request, so prefer the tunnel.
 
 Put it on your PATH:
 
@@ -76,6 +89,11 @@ codesquire --docker "fix the failing test in test_api.py"
 codesquire -C ~/some/project -y --step-limit 60 "migrate the config loader to pydantic"
 echo "write a smoke test for the parser" | codesquire -y
 ```
+
+Starting a session with no prompt opens on a banner showing the model, the endpoint, the
+working directory and whether the sandbox is on, so what you are pointed at is on screen
+before you type. It scales down on a narrow terminal and drops the colour under
+`NO_COLOR`. One-shot prompts print nothing extra, so piping stays clean.
 
 An interactive session is a conversation — "now add tests for that" means the file it
 just wrote. `/new` starts over. Other commands: `/auto`, `/cwd [path]`, `/steps N`,
@@ -130,7 +148,7 @@ nothing executes unattended by accident.
 
 | Flag | Default | Meaning |
 |---|---|---|
-| `--api-base` | `$CODESQUIRE_API_BASE` or `http://localhost:8000/v1` | vLLM OpenAI endpoint |
+| `--api-base` | `$CODESQUIRE_API_BASE`, else `localhost:8080` then `localhost:8000` | vLLM OpenAI endpoint |
 | `-m`, `--model` | first model the server reports | model id |
 | `-C`, `--cwd` | current directory | where commands run |
 | `--docker` | off | run commands in a throwaway container; implies `-y` |
@@ -175,13 +193,22 @@ Each command runs in a fresh subshell, so `cd` and exports do not persist betwee
 the same semantics the model was trained on. Prefix a command with `cd /path && ...` to
 work elsewhere.
 
-Two guards for small models. When a long task approaches the context window, the oldest
-command outputs are elided in place (never dropped, which would break the alternation);
-if the server still rejects the prompt, the CLI frees more context and retries rather
-than losing the task. And when the model runs the same command over and over, it gets
-nudged to change course after 3 repeats and the task is abandoned after 8 —
-`scripts/swebench_runner.py` does the same for evals, but silently, since a benchmark
-wants the honest failure and a person at a terminal wants a way out.
+Three guards for small models. When a long task approaches the context window, the
+oldest command outputs are elided in place (never dropped, which would break the
+alternation); if the server still rejects the prompt, the CLI frees more context and
+retries rather than losing the task.
+
+When the model runs the same command over and over, it is nudged to change course after
+3 repeats, and a task that produces 8 identical responses in a row is abandoned.
+`scripts/swebench_runner.py` does the same for evals, but silently and only on repeated
+commands, since a benchmark wants the honest failure and a person at a terminal wants a
+way out.
+
+And a malformed response is asked about twice, then worked with: a model that keeps
+sending two bash blocks has the first one run rather than being refused forever. This
+matters more than it sounds — repeats are counted on whole responses, not just on
+commands that reached the shell, because a model stuck on formatting never gets as far
+as running anything.
 
 ## Tests
 
@@ -189,5 +216,5 @@ wants the honest failure and a person at a terminal wants a way out.
 python3 cli/test_codesquire.py
 ```
 
-86 checks over the parsing, prompt, observation, trimming, risk and sandbox helpers. The
+139 checks over the parsing, prompt, observation, trimming, risk and sandbox helpers. The
 agent loop itself is exercised by hand against a mock vLLM server and a live one.
