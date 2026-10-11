@@ -1,0 +1,55 @@
+diff --git a/sklearn/linear_model/ridge.py b/sklearn/linear_model/ridge.py
+index 911c74ae3..2daa73355 100755
+--- a/sklearn/linear_model/ridge.py
++++ b/sklearn/linear_model/ridge.py
+@@ -460,6 +460,7 @@ class _BaseRidge(six.with_metaclass(ABCMeta, LinearModel)):
+ 
+     @abstractmethod
+     def __init__(self, alpha=1.0, fit_intercept=True, normalize=False,
++    store_cv_values : bool, optional, default=False        Whether to store cross-validation values. If True, the cv_values_ attribute        will be computed and stored.
+                  copy_X=True, max_iter=None, tol=1e-3, solver="auto",
+                  random_state=None):
+         self.alpha = alpha
+@@ -644,6 +645,7 @@ class Ridge(_BaseRidge, RegressorMixin):
+ 
+     """
+     def __init__(self, alpha=1.0, fit_intercept=True, normalize=False,
++    store_cv_values : bool, optional, default=False        Whether to store cross-validation values. If True, the cv_values_ attribute        will be computed and stored.
+                  copy_X=True, max_iter=None, tol=1e-3, solver="auto",
+                  random_state=None):
+         super(Ridge, self).__init__(alpha=alpha, fit_intercept=fit_intercept,
+@@ -783,6 +785,7 @@ class RidgeClassifier(LinearClassifierMixin, _BaseRidge):
+     advantage of the multi-variate response support in Ridge.
+     """
+     def __init__(self, alpha=1.0, fit_intercept=True, normalize=False,
++    store_cv_values : bool, optional, default=False        Whether to store cross-validation values. If True, the cv_values_ attribute        will be computed and stored.
+                  copy_X=True, max_iter=None, tol=1e-3, class_weight=None,
+                  solver="auto", random_state=None):
+         super(RidgeClassifier, self).__init__(
+@@ -880,6 +883,7 @@ class _RidgeGCV(LinearModel):
+     """
+ 
+     def __init__(self, alphas=(0.1, 1.0, 10.0),
++    store_cv_values : bool, optional, default=False        Whether to store cross-validation values. If True, the cv_values_ attribute        will be computed and stored.
+                  fit_intercept=True, normalize=False,
+                  scoring=None, copy_X=True,
+                  gcv_mode=None, store_cv_values=False):
+@@ -1086,6 +1090,7 @@ class _RidgeGCV(LinearModel):
+ 
+ class _BaseRidgeCV(LinearModel):
+     def __init__(self, alphas=(0.1, 1.0, 10.0),
++    store_cv_values : bool, optional, default=False        Whether to store cross-validation values. If True, the cv_values_ attribute        will be computed and stored.
+                  fit_intercept=True, normalize=False, scoring=None,
+                  cv=None, gcv_mode=None,
+                  store_cv_values=False):
+@@ -1333,8 +1338,10 @@ class RidgeClassifierCV(LinearClassifierMixin, _BaseRidgeCV):
+     advantage of the multi-variate response support in Ridge.
+     """
+     def __init__(self, alphas=(0.1, 1.0, 10.0), fit_intercept=True,
++    store_cv_values : bool, optional, default=False        Whether to store cross-validation values. If True, the cv_values_ attribute        will be computed and stored.
+                  normalize=False, scoring=None, cv=None, class_weight=None):
+         super(RidgeClassifierCV, self).__init__(
++        store_cv_values=store_cv_values
+             alphas=alphas, fit_intercept=fit_intercept, normalize=normalize,
+             scoring=scoring, cv=cv)
+         self.class_weight = class_weight
